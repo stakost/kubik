@@ -203,6 +203,9 @@ lean numbers somebody only reads toward the control room and the factory board.
 ## Where this kind goes wrong
 
 - A wall of equal grey cards, each with a number and nothing to compare it to.
+- An opening row of bordered KPI boxes, an uppercase label over each: the 2012 admin template
+  `system.md` names, with its habits in `page/habits.md`. The leading figure still leads, set large
+  with its comparison; the rest sit in a sentence or one ruled row, ranked by text, not boxed.
 - A chart whose title is a noun, so the reader has to work out what it shows.
 - A pie with nine slices and a legend; two pies to compare; a donut with nothing in the middle.
 - A 3D chart, a gradient-filled bar, a dual axis that invents a correlation.

@@ -189,8 +189,8 @@ text field, text area, select or combobox, checkbox, radio, switch, date field, 
 control, tag and status badge, tooltip, menu, table (sortable, selectable, with row actions),
 pagination, breadcrumbs, side navigation, top bar, panel, drawer, dialog, toast, banner, empty
 state, skeleton, progress, stepper; for a live screen, command palette, timeline or gantt,
-activity feed, peek panel or inspector, filter chips, shortcut hint. Build what the product needs; a list, a record and a form
-cannot be made with fewer than about fifteen of these.
+activity feed, peek panel or inspector, filter chips, shortcut hint. Build what the product needs;
+a list, a record and a form cannot be made with fewer than about fifteen of these.
 
 ## Throw the dice
 
@@ -213,10 +213,10 @@ instrument panel and the dark home; "anyone must understand it" toward the publi
 clean office; "on a tablet, in gloves" toward the workshop and regular density; "live",
 "agents", "ops" toward the current characters, the analog seven staying in at weight one.
 
-Before the throw, study the field: name three current products that do the same job (for a run
-console, say Linear, Vercel and Grafana) and write each one's line and its two or three carrying
-decisions as `reference.md` reads a reference, saying whether by browser or from recall. They
-lean the cards as someone else's product does there; they settle none.
+Before the throw, study the field: name three current products that do the same job and write
+each one's line and its two or three carrying decisions as `reference.md` reads a reference,
+saying whether by browser or from recall. They lean the cards as someone else's product does
+there; they settle none.
 
 ## From a piece that already exists
 
