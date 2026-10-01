@@ -1,0 +1,43 @@
+{
+  "name": "kubik",
+  "version": "1.0.0",
+  "description": "A free artist, a shared frame, and dice: a design skill for landing pages, reports, slide decks, pages of figures and design systems that do not come out looking alike, and a words skill that writes for the person who reads.",
+  "author": {
+    "name": "Konstantin Stasenko",
+    "url": "https://github.com/stakost"
+  },
+  "homepage": "https://github.com/stakost/kubik",
+  "repository": "https://github.com/stakost/kubik",
+  "license": "Apache-2.0",
+  "keywords": [
+    "skills",
+    "design",
+    "frontend",
+    "landing-page",
+    "slides",
+    "report",
+    "dashboard",
+    "design-system"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks-codex.json",
+  "interface": {
+    "displayName": "Kubik",
+    "shortDescription": "Design skill with a frame, a method and dice",
+    "longDescription": "Makes landing pages, reports, slide decks, pages of figures and design systems that do not look alike. It listens to what the person wants to see, throws dice for whatever they left open, picks a concept and draws it, inside one frame: what the reader needs. Every piece is opened in a real browser and checked before it is handed over.",
+    "developerName": "Konstantin Stasenko",
+    "category": "Design",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Make a landing page for this project.",
+      "Turn these findings into a report.",
+      "Show this idea as slides.",
+      "Make a design system for our back office."
+    ],
+    "websiteURL": "https://github.com/stakost/kubik"
+  }
+}

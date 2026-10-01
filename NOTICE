@@ -1,0 +1,13 @@
+kubik
+Copyright 2026 Konstantin Stasenko
+https://github.com/stakost/kubik
+
+This product was written by Konstantin Stasenko. Any copy or derivative
+work that is distributed must keep this notice, with the author's name
+and the link above, as section 4(d) of the Apache License 2.0 requires.
+
+Third-party software distributed with this product:
+
+axe-core (skills/kubik/scripts/vendor/axe.min.js)
+Copyright (c) 2015 - 2024 Deque Systems, Inc.
+Licensed under the Mozilla Public License 2.0; distributed unmodified.

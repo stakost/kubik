@@ -1,0 +1,15 @@
+{
+  "name": "kubik",
+  "owner": {
+    "name": "Konstantin Stasenko",
+    "url": "https://github.com/stakost"
+  },
+  "description": "A design skill for pages, reports, decks, figures and design systems, and a words skill for the text people read: a frame, a method and dice.",
+  "plugins": [
+    {
+      "name": "kubik",
+      "source": ".",
+      "version": "1.0.0"
+    }
+  ]
+}

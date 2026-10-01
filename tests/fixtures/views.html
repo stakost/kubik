@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two screens</title>
+<meta name="description" content="One address, two screens; the second is broken.">
+<style>
+  body { margin: 0; font: 18px/1.5 Georgia, serif; }
+  .skip { position: absolute; left: 16px; top: -60px; background: #000; color: #fff; padding: 12px 16px; }
+  .skip:focus { top: 12px; }
+  main { padding: 24px 16px; }
+  nav a { display: inline-block; padding: 12px 8px; }
+  a:hover { text-decoration-thickness: 3px; }
+  a:focus-visible { outline: 3px solid #2340d6; outline-offset: 3px; }
+  [hidden] { display: none; }
+  .tiny { font-size: 8px; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<main id="main">
+  <h1>Two screens</h1>
+  <nav aria-label="Screens"><a href="#list">List</a> <a href="#form">Form</a></nav>
+  <section id="list"><h2>List</h2><p>The sound screen.</p></section>
+  <section id="form" hidden><h2>Form</h2><p class="tiny">The screen nobody looked at.</p></section>
+</main>
+<script>
+  function show() {
+    var form = location.hash === '#form';
+    document.getElementById('form').hidden = !form;
+    document.getElementById('list').hidden = form;
+  }
+  addEventListener('hashchange', show); show();
+</script>
+</body>
+</html>

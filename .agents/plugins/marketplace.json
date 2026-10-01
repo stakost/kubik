@@ -1,0 +1,22 @@
+{
+  "name": "kubik",
+  "interface": {
+    "displayName": "Kubik"
+  },
+  "plugins": [
+    {
+      "name": "kubik",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "Design",
+      "description": "A design skill for pages, reports, decks, figures and design systems, and a words skill for the text people read: a frame, a method and dice.",
+      "version": "1.0.0"
+    }
+  ],
+  "description": "A design skill for pages, reports, decks, figures and design systems, and a words skill for the text people read: a frame, a method and dice."
+}
