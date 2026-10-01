@@ -106,8 +106,9 @@ Follow the kind or style file. Roll with `bash <kubik>/scripts/roll.sh` and the 
 file gives, leaned the way the person pointed. Before the command runs, edit its string: a
 typeface that does not cover the script the piece is written in comes out, and so does any card
 the piece cannot carry; a card pruned after the throw is a throw wasted. Look at the result with
-`node <kubik>/scripts/page-audit.mjs` (and `node <kubik>/scripts/deck-shots.mjs` for slides). Your closing note follows `frame.md`, and adds one line
-for each wish you heard: settled, leaned, or set aside and why.
+`node <kubik>/scripts/page-audit.mjs` (and `node <kubik>/scripts/deck-shots.mjs` for slides), once,
+as `frame.md` §10 says. Your closing note follows `frame.md`, and adds one line for each wish you
+heard: settled, leaned, or set aside and why.
 
 The scripts need what the machine may not have: the dice need `bash`; the lint needs Node 16 or
 newer; the audit and the deck photographer need Node 22 or newer and a Chromium-family browser

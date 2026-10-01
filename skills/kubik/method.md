@@ -87,8 +87,9 @@ carried out with precision. It is wrong when it happened because plain was safer
    flat? Where did you settle? Then push one step further than is comfortable: more scale, more
    depth, a bolder cut, a stranger detail. Most pages stop one step too early.
 
-7. **Then the frame.** Run the audit in `frame.md`. Repair what fails without removing what
-   works, and read the RICHNESS list against what this style is for.
+7. **Then the frame.** Run the audit in `frame.md` once the piece is built, not after every
+   change. Repair what fails without removing what works, and read the RICHNESS list against what
+   this style is for.
 
 8. **Say what you made of what you heard.** One line for each wish: settled, leaned, or set aside
    and why. The person should be able to see their words in the result, or know why not.

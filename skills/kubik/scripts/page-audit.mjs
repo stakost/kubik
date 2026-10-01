@@ -3,8 +3,8 @@
 //
 //   node page-audit.mjs <url-or-html-file> [--out <dir>] [--max <n>] [--chrome <path>] [--views "#a,#b"] [--quick]
 //
-// --quick skips the dark-scheme and reduced-motion runs: half the time, for the middle of the work.
-// The last run before handing over is never quick. Before any run, `node lint.mjs <file>` reads the
+// --quick skips the dark-scheme, reduced-motion, tablet and script-off runs: the default check.
+// The full run is for a full check on request or a piece about to go public. Before any run, `node lint.mjs <file>` reads the
 // file without a browser and catches what it can in a second.
 //
 // --views names further screens of the same page by their hash (a list, a record, a form): each is
@@ -56,7 +56,7 @@ if (!/^https?:\/\//.test(target) && !existsSync(resolve(target.replace(/#.*$/, '
 const url = /^https?:\/\//.test(target) ? target : pathToFileURL(resolve(target.replace(/#.*$/, ''))).href + (target.includes('#') ? target.slice(target.indexOf('#')) : '');
 const OUT = resolve(flag('--out', './page-audit'));
 const MAX = parseInt(flag('--max', '10'), 10);
-const QUICK = args.includes('--quick');   // desktop and phone only, for the middle of the work
+const QUICK = args.includes('--quick');   // desktop and phone only, the default check
 const VIEWS = (flag('--views', '') || '').split(',').map((v) => v.trim()).filter(Boolean).map((v) => (v.startsWith('#') ? v : '#' + v));
 const GIVEN = flag('--chrome', process.env.CHROME_PATH);
 const CHROME = findBrowser(GIVEN);

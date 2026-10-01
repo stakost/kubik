@@ -225,15 +225,17 @@ A page nobody rendered is a draft.
 1. **Lint first**: `node <kubik>/scripts/lint.mjs <file>` reads the file in a second, without a
    browser, and names what the audit would fail: structure, sizes written in the stylesheet, a
    missing pause control, a deck without a wheel. Repair that before spending a browser run.
-   Then **render it and look**: desktop near 1440, phone near 390, a tablet near 1024 when the
-   piece has a drawing or a rail that changes form, each colour scheme you ship, reduced motion.
-   Scroll all of it.
-2. **Run the audit**: `node <kubik>/scripts/page-audit.mjs <url-or-file> --out <dir>`, with `--out` a
-   directory of its own
+2. **Run the audit once, when the piece is built**: `node <kubik>/scripts/page-audit.mjs
+   <url-or-file> --quick --out <dir>`, with `--out` a directory of its own
    (add `--views "#list,#record,#form"` when the piece has several screens behind one address:
    each is checked and photographed in the same run). It
-   takes those screenshots, runs axe-core, walks the page with the Tab key, presses the pause
-   control, renders once with script off, and prints two lists:
+   takes screenshots at every width it renders, runs axe-core, walks the page with the Tab key, presses the pause
+   control, and prints two lists; open its screenshots and scroll through all of them as a
+   stranger would. The quick run covers desktop and phone. The full run (drop `--quick`) adds the
+   dark scheme, reduced motion, a tablet and the page with script off; it is the last run when the
+   person asks for a full check or the piece is about to go public, and otherwise it waits to be
+   asked for. A run is minutes the person waits, so the work is checked once, not after every
+   change.
    - **FRAME**: PASS, FAIL and WARN lines for this file. Every FAIL is repaired. A WARN is repaired
      or explained; where the WARN's own line says the measurement hit a limit of the script, say
      that and not a design reason. Where axe says "needs a human look" (text over a gradient, glass,
@@ -243,9 +245,8 @@ A page nobody rendered is a draft.
      transition rules answer the touch. There is no pass mark. Read it
      against what your style asks for: a style built on atmosphere, scale or motion whose numbers
      sit near zero is not finished, however clean its FRAME.
-3. **Run it again after the fixes.** `--quick` (desktop and phone only) is for the middle of the
-   work; the last run before handing over is the full one. If FRAME went clean and RICHNESS went
-   down, you removed instead of repairing: put it back and fix it properly.
+3. **Run it once more after the fixes**, the same kind of run, and stop there. If FRAME went clean
+   and RICHNESS went down, you removed instead of repairing: put it back and fix it properly.
 4. **The last change is followed by a check, always.** A repair made after the last run is a guess,
    and a guessed repair has replaced a form control blind. If the runs are spent, either undo the
    change or open the note with the line "Unchecked: …" naming it. Never ship it silently.
@@ -260,11 +261,16 @@ lint's rules as the checklist. This holds for a deck and `deck-shots` as for a p
 anything and never spend the work on the environment: build the piece, run what runs, and say
 what did not.
 
+**When the person asks for speed, the browser waits.** "Fast", "no check", "skip the audit", in
+any words: run the lint only (a second, no browser), hand over, and open the note with
+`Unchecked: browser audit, skipped for speed on request`. The waiver covers this hand-over; a
+piece about to go public still gets its full run first, unless the person waives that too by name.
+
 **Your report** (this list is the whole note; other files only add lines to it), in this order:
 
-1. The first line, one of: `Unchecked: …` (a change after the last run), `Not rendered: …` (no
-   browser; what is therefore unverified), `Sample content: …` (the material was invented and
-   marked), or the concept line when none of those applies.
+1. The first line, one of: `Unchecked: …` (a change after the last run, or the check skipped on
+   request), `Not rendered: …` (no browser; what is therefore unverified), `Sample content: …`
+   (the material was invented and marked), or the concept line when none of those applies.
 2. The concept in one or two lines, and the two concepts you did not take, one line each.
 3. The kind and the register; what the dice gave you and what you did with it.
 4. One line for each wish you heard: settled, leaned, or set aside and why.
@@ -272,3 +278,5 @@ what did not.
    style; the `response` line; for a deck, the `controls` line; the habits `words.md` §4 found and
    removed, in a line.
 6. What you pushed after the first look, and what it cost; what the target made impossible.
+7. When the full run did not happen, one line offering it and saying what it adds ("Say 'full
+   check' and I run the dark scheme, reduced motion, a tablet and script off.").
