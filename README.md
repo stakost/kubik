@@ -13,6 +13,23 @@ Kubik is Russian for a die.
 
 <a href="https://stakost.github.io/kubik/"><img src="https://stakost.github.io/kubik/img/die-throw.gif" alt="The landing page's hero. A die is thrown twice; each time it lands, the headline, colours, type and background of the page change to a different world: a cinematic night, a strict board page, and back." width="960"></a>
 
+## New in 1.2: screens that show work as it happens
+
+Ask kubik for a tracker, a console or a settings page and it now builds the screen for the person
+who operates it. Where work runs over time (runs, deployments, agents, queues), the screen gets a
+view shaped by time: an axis with a line for now, a feed where new items wait behind an "N new"
+chip while you read, a panel that opens an item beside the list, and ⌘K for every action. Five
+current characters join the seven older ones in the roll, and the skill names the look it steers
+away from: an opening row of boxed KPI tiles with an uppercase label over each.
+
+<img src="https://stakost.github.io/kubik/img/console-pair.jpg" alt="The same brief, an agent console, built twice. Left, a model on its own: five boxed KPI tiles, a bar chart and a table. Right, kubik 1.2: every agent's runs on one time axis with a line for now, scheduled work drawn dashed, a quiet gap labelled, and the table below." width="960">
+
+The same brief built twice: by a model on its own (left) and with kubik 1.2 (right). In a blind
+test, five interfaces were each built three ways and scored out of 25 by a critic who did not know
+which was which. Kubik 1.2 came first on all five (114 in total), kubik 1.0 second (106), no kubik
+third (87). It was one build per cell, so the order holds and the size of the gap is a first
+reading.
+
 ## Install
 
 **Claude Code**
