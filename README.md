@@ -9,6 +9,10 @@ the screen needs. Every piece is opened in a real browser and checked before it 
 
 Kubik is Russian for a die.
 
+[**Open the landing page**](https://stakost.github.io/kubik/) and throw the die.
+
+<a href="https://stakost.github.io/kubik/"><img src="https://stakost.github.io/kubik/img/die-throw.gif" alt="The landing page's hero. A die is thrown twice; each time it lands, the headline, colours, type and background of the page change to a different world: a cinematic night, a strict board page, and back." width="960"></a>
+
 ## Install
 
 **Claude Code**
@@ -76,7 +80,23 @@ Ask "what can kubik do" and it shows the menu.
 A project that holds a `DESIGN.md` is read first: what it decides is kept, and only what it
 leaves free is rolled. Kubik writes that file itself when asked for a design system.
 
+## What it makes
+
+Six finished pieces, built with kubik on sample content. Two are figures, two are design systems, and two are slides. The text inside them is Russian.
+
+<img src="https://stakost.github.io/kubik/img/pieces.jpg" alt="Six pieces made with kubik: a newspaper-style board report, a consulting-style audit summary, a dark operations console, a playful design system with a 3D die, a cut-paper title slide and a night-sky title slide." width="960">
+
+The same goes for the words. Kubik runs its words rules over every string it puts on a page, and `kubik-words` rewrites any text on its own.
+
+> **A model's default.** In today's fast-paced digital landscape, great design is more crucial than ever. Kubik is a powerful, innovative design skill that seamlessly empowers developers to unlock stunning, cutting-edge interfaces. Ready to take your designs to the next level?
+
+> **After kubik-words.** Kubik is a skill for Claude Code and Codex that designs pages, reports, slides, figures and design systems. Tell it what you want to see, in any words. It throws dice for whatever you left open, draws one concept, and opens the result in a real browser before it hands it to you.
+
 ## How it works
+
+The same message, thrown into six worlds. Each is a different feeling and a different way of showing information; the words stay put.
+
+<img src="https://stakost.github.io/kubik/img/worlds.jpg" alt="Six screenshots of one short message set in six different designs: a strict board page, a cinematic night, a brutal blueprint, a human letter, a candy shop and an acid poster." width="960">
 
 - **The frame** (`frame.md`) is what the reader needs: true content, text that can be read, a
   page that works on a phone and from a keyboard, controls that answer the touch, motion that can
