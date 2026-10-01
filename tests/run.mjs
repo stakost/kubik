@@ -101,6 +101,18 @@ check('roll.sh with no arguments exits 2 with a usage line', (() => { const r = 
   check(`a weighted card is drawn far more often (${heavy} of 60 at weight 50)`, heavy >= 50);
 }
 check('roll.sh refuses a group with no cards (exit 2)', run('bash', [join(SCRIPTS, 'roll.sh'), 'empty=']).status === 2);
+{ // every roll command written in a skill text runs as written, one card per group
+  const bad = []; let seen = 0;
+  for (const f of mdFiles) for (const [, body] of read(f).matchAll(/bash <kubik>\/scripts\/roll\.sh \\\n([\s\S]*?)\n```/g)) {
+    const groups = [...body.matchAll(/^\s*([\w:]+)="([^"]*)"/gm)].map((m) => `${m[1]}=${m[2]}`);
+    const r = run('bash', [join(SCRIPTS, 'roll.sh'), ...groups]); seen++;
+    if (!groups.length || r.status !== 0 || r.stdout.trim().split('\n').length !== groups.length) bad.push(`${relative(ROOT, f)}: ${r.stderr || r.stdout}`);
+  }
+  check(`every roll command in a skill text runs and draws one line per group (${seen})`, seen >= 8 && bad.length === 0, bad.join('\n'));
+  const character = /character="([^"]*)"/.exec(read(join(SKILL, 'system.md')))?.[1].split('|') ?? [];
+  const analog = ['instrument panel', 'ledger', 'clean office', 'public service', 'workshop', 'clinic', 'control desk'];
+  check('the system roll keeps the analog seven beside the current characters', analog.every((c) => character.includes(c)) && character.length > analog.length, character.join(', '));
+}
 for (const s of ['page-audit.mjs', 'deck-shots.mjs']) {
   const extra = s === 'deck-shots.mjs' ? ['--slides', '3'] : [];
   check(`${s} exits 2 on a missing file and a flag without a value`, [

@@ -73,6 +73,26 @@ An application system keeps the skeleton its users already know. The dice never 
 - **The keyboard does everything**: every control is reached and operated, focus is always
   visible, the order follows the reading order, frequent actions have shortcuts that are shown.
 
+## A live screen
+
+Some screens show work happening over time: runs, deployments, agents, queues, incidents. A
+table of rows that change in place hides exactly what the person came to see, so such a screen
+adds a time-shaped view to the conventions above. These are directions, not a layout:
+
+- **Time is an axis** when duration, overlap or silence matters: a now-line, history to its left,
+  only declared or scheduled things to its right (drawn dashed and labelled, never predicted), and
+  a "back to now" control once the person scrolls away. Silence is drawn, and its age written.
+- **Events are a feed** when order matters more than duration: an arrival is highlighted for 400
+  to 600ms and settles; rows already on screen keep their place; while the person reads or hovers,
+  arrivals wait behind an "N new" chip instead of pushing the list.
+- **A peek panel** opens the selected item beside the list or the axis without leaving it: Space
+  or a click opens it, the arrows step through neighbours, Esc closes, the address holds the
+  selection.
+- **A command palette** (⌘K or Ctrl+K) reaches every action and object; filters sit as chips the
+  person can see and remove.
+
+When the product is live, the specimen shows one of these working, beside the list.
+
 ## What is handed over
 
 1. **`DESIGN.md`, the record.** Short enough to be read in one sitting, exact enough to build
@@ -124,7 +144,8 @@ An application system is quiet by nature, so its RICHNESS is read as `quiet.md` 
 gradients, shadows and loops near zero are the intent; what must not be near zero is the response
 line, and what matters most the script cannot count: whether every state exists. One rule of
 `quiet.md` does not apply here: the one about scale. The largest type in working software is a
-page title, and it stays modest.
+page title, and it stays modest; hierarchy comes instead from text roles (primary, secondary,
+tertiary) and from space, not from boxes.
 
 ## The shelves
 
@@ -133,6 +154,11 @@ reading. A ledger: ruled, calm, tabular. A clean office: white, one blue, nothin
 properly. A public service: plain words, high contrast, large targets. A workshop: warm neutrals,
 sturdy controls, sized for a tablet and a hurried finger. A clinic: cool white, one calm colour,
 legibility above everything. A control desk: a dark shell around a light working surface.
+And current ones, from software people use now: a dense dark tool (tinted near-black, borders at
+about 8% white, one accent); a calm SaaS console (white, generous rows, text roles doing the
+hierarchy); a developer console (mono where it reads, logs and keys first); an observability
+canvas (time across the screen, colour only for state); a native-feeling app (a translucent
+sidebar, system type). Examples all, the old and the new alike.
 
 **Colour logic.** A neutral ramp of eight to ten steps, warm, cool or true; one accent; four
 status meanings (good, caution, wrong, note) tuned to the neutrals instead of taken at full
@@ -149,39 +175,48 @@ and 14 pixels.
 One vocabulary per system. Pills are for tags and switches, not for buttons and fields.
 
 **Depth.** Hairlines only. Tonal layers. Soft shadows on overlays only (menus, dialogs, toasts).
-One strategy per system.
+Translucent chrome: blur behind sticky bars and overlays, contrast checked against what shows
+through. One strategy per system.
 
 **Density.** Compact and regular, both defined; one is the home.
 
 **Motion.** Instant, or quick and eased (120 to 200ms), for overlays and state changes only.
-Nothing bounces where people work.
+Live: arrivals highlight and settle, and a short, critically damped spring follows direct
+manipulation (a drawer, a drag, a reorder). Nothing bounces where people work: no overshoot.
 
 **The kit.** Button and icon button (primary, secondary, quiet, destructive; two sizes), link,
 text field, text area, select or combobox, checkbox, radio, switch, date field, tabs, segmented
 control, tag and status badge, tooltip, menu, table (sortable, selectable, with row actions),
 pagination, breadcrumbs, side navigation, top bar, panel, drawer, dialog, toast, banner, empty
-state, skeleton, progress, stepper. Build what the product needs; a list, a record and a form
+state, skeleton, progress, stepper; for a live screen, command palette, timeline or gantt,
+activity feed, peek panel or inspector, filter chips, shortcut hint. Build what the product needs; a list, a record and a form
 cannot be made with fewer than about fifteen of these.
 
 ## Throw the dice
 
 ```
 bash <kubik>/scripts/roll.sh \
-  character="instrument panel|ledger|clean office|public service|workshop|clinic|control desk" \
+  character="instrument panel|ledger|clean office|public service|workshop|clinic|control desk|dense dark tool|calm SaaS console|developer console|observability canvas|native-feeling app" \
   home="light|dark|a dark shell around a light surface" \
   neutrals="cool|warm|true grey|tinted toward the accent" \
   accent="blue|teal|emerald|indigo|violet|amber|vermilion" \
   voice="a neutral grotesque|a humanist sans|a geometric sans" \
   shape="no radius|2 and 4|4, 6, 8|6, 10, 14" \
-  depth="hairlines only|tonal layers|soft shadows on overlays only" \
+  depth="hairlines only|tonal layers|soft shadows on overlays only|translucent chrome" \
   density="compact|regular" \
-  motion="instant|quick and eased"
+  motion="instant|quick and eased|live"
 ```
 
 A product that exists settles most of these before the throw: its colour, its typeface, its
 logo's shapes. What the person said leans the rest: "engineers, all night" leans toward the
 instrument panel and the dark home; "anyone must understand it" toward the public service and the
-clean office; "on a tablet, in gloves" toward the workshop and regular density.
+clean office; "on a tablet, in gloves" toward the workshop and regular density; "live",
+"agents", "ops" toward the current characters, the analog seven staying in at weight one.
+
+Before the throw, study the field: name three current products that do the same job (for a run
+console, say Linear, Vercel and Grafana) and write each one's line and its two or three carrying
+decisions as `reference.md` reads a reference, saying whether by browser or from recall. They
+lean the cards as someone else's product does there; they settle none.
 
 ## From a piece that already exists
 
@@ -212,6 +247,10 @@ else in this file holds: roles, states, five decisions, the record.
 ## Where a system goes wrong
 
 - It looks like a landing page: a hero, a slogan, a gradient, and one table at the bottom.
+- It looks like a 2012 admin template: a row of bordered KPI boxes as the opening, an uppercase
+  micro-label and a number over every block, a hairline box around every region, medium type
+  everywhere. `page/habits.md` and `method.md` "Of its time" name these habits; what stays is the
+  shell and the table, with hierarchy carried by text roles and space.
 - The navigation is somewhere clever.
 - A palette with names and no roles, so nobody knows which grey is the text.
 - Components drawn only at rest; a table that is never empty, loading or wrong.

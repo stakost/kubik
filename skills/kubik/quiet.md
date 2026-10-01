@@ -15,6 +15,9 @@ quiet. It changes how you use the shelves, not which file you follow.
 - A second accent colour. A third typeface.
 - Decoration that stands for an idea the page does not have.
 
+A system's own chrome is the one exception: when its depth card is translucent chrome, the blur
+behind its sticky bars and overlays stays, here and in the leaning below (`system.md`).
+
 ## What stays, and carries everything
 
 - **The method.** Still a subject, still three concepts, still one signature moment. A quiet

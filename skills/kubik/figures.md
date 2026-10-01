@@ -197,7 +197,8 @@ the script the page is written in; for a board, take `ink-dark` and `deep navy` 
 
 A brand settles `accent`, `figures` and often `ground`. "Serious", "for the board", "bank"
 lean `world` toward the annual report, the consulting page and the investor letter; "live",
-"operations", "monitoring" lean it toward the control room and the factory board.
+"operations", "monitoring" send a screen somebody operates to `system.md` ("A live screen"), and
+lean numbers somebody only reads toward the control room and the factory board.
 
 ## Where this kind goes wrong
 

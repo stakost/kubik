@@ -11,7 +11,7 @@ node tests/run.mjs
 
 Needs Node 22 or newer, and a Chromium-family browser for the browser part (`--no-browser` skips
 it; with none found it is skipped with the reason; `CHROME_PATH` points at one the search missed). It checks the manifests, the skill's
-frontmatter and file references, the lint, the shared deck runtime, the three other scripts (arguments, exit codes, a sound page, a broken
+frontmatter and file references, every roll command as written, the lint, the shared deck runtime, the three other scripts (arguments, exit codes, a sound page, a broken
 page, a page with two screens, a small deck and its four controls) and the hook script. Every line
 is `PASS`, `FAIL` or `SKIP`; the exit code is 0 only when nothing failed.
 
@@ -67,6 +67,7 @@ record what is asked under "Record".
 | 9 | `kubik: a page like <a real site you name>, but for a bakery` | `SKILL.md`, `reference.md`, `page.md`, `method.md`, `frame.md` | the reference's line and decisions written down; what was taken and what was changed |
 | 10 | `kubik: slides about the quarter` (no data given) | `SKILL.md`, `slides.md`, … | one question if you are there; otherwise sample content, marked as sample, and said in the first line of the note |
 | 11 | `what can kubik do?` | `SKILL.md`, `menu.md` | a short menu, no piece built |
+| 12 | `kubik: a live console for agent runs, dark` | `SKILL.md`, `system.md`, `quiet.md`, `method.md`, `frame.md` | three current products named before the throw; a specimen with a time axis and a now-line, a peek panel and a command palette; no bordered KPI row, no uppercase label over every block, no hairline box around every region |
 
 **Record, for each ask**
 

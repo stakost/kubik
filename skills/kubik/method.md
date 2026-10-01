@@ -24,7 +24,8 @@ carried out with precision. It is wrong when it happened because plain was safer
    reads this, where it is shown (a board room, a phone between meetings, a launch, a team's
    retro), and what they do with it afterwards (decide, forward, present, keep using). The
    occasion is the context the person did not spell out, and most of what they want is in it: a
-   quarterly report for a manager wants to be sent today, not admired once.
+   quarterly report for a manager wants to be sent today, not admired once. For a screen somebody
+   operates, read the field too: what current products doing the same job decide (`system.md`).
 
 2. **Throw the dice, conditioned on what you heard and read.** Run the roll command in the file
    you were sent to. The first idea a model has is the one every model has; the throw is there to
