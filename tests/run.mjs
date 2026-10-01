@@ -216,6 +216,11 @@ else {
     check('audit: --press opens an overlay and the defect inside it fails; unpressed, the page passes', fails(press, /FAIL no text lies under, or runs into, something else .*after pressing #open/) && /PASS no text lies under/.test(unpressed.stdout) && unpressed.status === 0, press.stdout.split('\n').filter((l) => /something else|press/.test(l)).join('\n'));
     check('audit: sideways scroll that appears further down the page is found and located', fails(side, /FAIL no sideways scroll on the phone, at any scroll position \(widest 2400px at y \d+\)/), side.stdout.split('\n').filter((l) => /sideways/.test(l)).join('\n'));
     check('audit: text axe leaves to a human is checked against its backing colour and warned about, as computed', /WARN text axe left to a human .*computed .*"Faint text on a plain page\." 1\.\d+:1 of 4\.5/.test(con.stdout), con.stdout.split('\n').filter((l) => /left to a human/.test(l)).join('\n'));
+    {
+      const far = audit('layout-far-view.html', ['--quick', '--views', '#far']);
+      const row = JSON.parse(readFileSync(join(out, 'layout-far-view.html', 'audit.json'), 'utf8')).views?.[0];
+      check('audit: a view is measured and photographed with its target in the window, far down the page', far.status === 0 && /target in view yes/.test(far.stdout) && row?.viewAt?.every((x) => x && x.found && x.inView && x.scrollY > 1000), far.stdout.split('\n').filter((l) => /view #/.test(l)).join('\n') + JSON.stringify(row?.viewAt));
+    }
     check('audit: --press with no selector exits 2', run('node', [join(SCRIPTS, 'page-audit.mjs'), join(FIX, 'good.html'), '--press']).status === 2);
   }
   const views = audit('views.html', ['--views', '#list,#form']);

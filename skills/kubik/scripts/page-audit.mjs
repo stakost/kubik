@@ -518,43 +518,42 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
   const lay = !layoutProbes ? null : await evalIn(LAYOUT({ overlap: true, cover: true }));
   const layout = { overlaps: [...new Set([...(earlyLayout?.overlaps ?? []), ...(lay?.overlaps ?? [])])], covered: [...(lay?.covered ?? [])], pressed: [], scrollMax: { w: out.metrics.scrollWidth ?? 0, y: 0 } };
   out.layout = layout;
-  if (layoutProbes) {
-    // Sections the page renders lazily (content-visibility, reveals) exist only near the viewport: walk the whole page, one screen at a time, and probe each stop.
-    const total0 = out.metrics.pageHeight ?? height;
-    for (let y = height; y < total0 && y < height * 60; y += Math.round(height * 0.85)) {
-      await evalIn(`window.scrollTo({ top: ${y}, behavior: 'instant' })`);
-      await sleep(650);   // a section's own reveal finishes before it is looked at
-      const sw = await evalIn('Math.max(document.documentElement.scrollWidth, document.body.scrollWidth)');
-      if (sw > layout.scrollMax.w) layout.scrollMax = { w: sw, y };
+  // One pass down the page does the screenshots and the layout probes together. A stop every screen lets lazily rendered sections
+  // (content-visibility, reveals) exist near the viewport when they are probed; the screenshots are taken at a few of those stops.
+  // A view is one screen: it is photographed and measured where its hash put it, with no walk.
+  const walkPage = layoutProbes && kind !== 'view';
+  const total = out.metrics.pageHeight ?? height, span = Math.max(0, total - height);
+  const shotYs = new Set();
+  if (shots) {
+    const n = Math.min(MAX, Math.max(1, Math.ceil(span / (height * 0.92)) + 1));
+    for (let i = 0; i < n; i++) shotYs.add(n === 1 ? 0 : Math.round((span * i) / (n - 1)));
+  }
+  const stops = new Set(shotYs);
+  if (walkPage) for (let y = Math.round(height * 0.95); y < total && stops.size < 80; y += Math.round(height * 0.95)) stops.add(y);
+  for (const y of [...stops].sort((a, b) => a - b)) {
+    await evalIn(`window.scrollTo({ top: ${y}, behavior: 'instant' })`);
+    await sleep(shotYs.has(y) ? (y === 0 ? 200 : 1100) : 300);   // a section's own reveal settles before it is looked at
+    const sw = await evalIn('Math.max(document.documentElement.scrollWidth, document.body.scrollWidth)');
+    if (sw > layout.scrollMax.w) layout.scrollMax = { w: sw, y };
+    if (walkPage && y > 0) {
       const more = await evalIn(LAYOUT({ overlap: true, cover: true }));
       for (const o of more?.overlaps ?? []) if (!layout.overlaps.includes(o)) layout.overlaps.push(o);
       for (const c of more?.covered ?? []) if (!layout.covered.includes(c)) layout.covered.push(c);
     }
-    await evalIn("window.scrollTo({ top: 0, behavior: 'instant' })");
-    await sleep(300);
+    if (shotYs.has(y)) { const f = `${kind}-${String(y).padStart(5, '0')}.jpg`; await shot(f); out.files.push(f); }
   }
-  // axe last: the walk above has fired the page's reveals, and axe skips text that is still faded out
+  if (stops.size) { await evalIn("window.scrollTo({ top: 0, behavior: 'instant' })"); await sleep(300); }
+  if (kind === 'view') {
+    // the view's own target is in the window when it is measured and photographed
+    out.viewAt = await evalIn(`(() => { const t = location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null; if (t) { let r = t.getBoundingClientRect(); if (r.bottom <= 0 || r.top >= innerHeight) { t.scrollIntoView({ block: 'start', behavior: 'instant' }); r = t.getBoundingClientRect(); } return { found: true, scrollY: Math.round(scrollY), top: Math.round(r.top), inView: r.bottom > 0 && r.top < innerHeight }; } return { found: false, scrollY: Math.round(scrollY), top: null, inView: true }; })()`);
+  }
+  // axe last: the walk has fired the page's reveals, and axe skips text that is still faded out
   if (audit) {
     await send('Runtime.evaluate', { expression: AXE });
     const a = await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: AXE_RUN });
     out.axe = a.result?.value ?? { error: JSON.stringify(a).slice(0, 400) };
   }
   if (single) { await shot(single); out.files.push(single); }
-  if (shots) {
-    const total = out.metrics.pageHeight ?? height;
-    const span = Math.max(0, total - height);
-    const n = Math.min(MAX, Math.max(1, Math.ceil(span / (height * 0.92)) + 1));
-    for (let i = 0; i < n; i++) {
-      const y = n === 1 ? 0 : Math.round((span * i) / (n - 1));
-      await send('Runtime.evaluate', { expression: `window.scrollTo({ top: ${y}, behavior: 'instant' })` });
-      await sleep(i === 0 ? 200 : 1100);
-      const sw = await evalIn('Math.max(document.documentElement.scrollWidth, document.body.scrollWidth)');
-      if (sw > layout.scrollMax.w) layout.scrollMax = { w: sw, y };
-      if (i > 0) { const more = await evalIn(LAYOUT({ overlap: false, cover: true })); for (const c of more?.covered ?? []) if (!layout.covered.includes(c)) layout.covered.push(c); }
-      const f = `${kind}-${String(y).padStart(5, '0')}.jpg`;
-      await shot(f); out.files.push(f);
-    }
-  }
   if (walk) {
     out.walkCap = Math.min(400, (out.metrics.interactive ?? 20) + 4);
     out.walk = await keyboardWalk(send, out.walkCap);
@@ -705,11 +704,11 @@ const VIEW_ROWS = (result.views ?? []).map((v) => {
   const w = v.wide.metrics, n = v.narrow.metrics;
   const row = { hash: v.hash, axe: nodes(v.wide.axe) + nodes(v.narrow.axe), small: (w.textUnder12px ?? 0) + (n.textUnder12px ?? 0),
     targets: (w.targetsUnder24px ?? 0) + (n.targetsUnder24px ?? 0), clipped: (w.clippedText ?? 0) + (n.clippedText ?? 0),
-    overlaps: (v.wide.layout?.overlaps.length ?? 0) + (v.narrow.layout?.overlaps.length ?? 0), covered: (v.wide.layout?.covered.length ?? 0) + (v.narrow.layout?.covered.length ?? 0),
+    viewAt: [v.wide.viewAt, v.narrow.viewAt], overlaps: (v.wide.layout?.overlaps.length ?? 0) + (v.narrow.layout?.overlaps.length ?? 0), covered: (v.wide.layout?.covered.length ?? 0) + (v.narrow.layout?.covered.length ?? 0),
     phoneWidth: n.scrollWidth ?? 0, errors: v.wide.errors.length + v.narrow.errors.length };
   row.rules = [...new Set([...(v.wide.axe?.violations ?? []), ...(v.narrow.axe?.violations ?? [])].map((x) => x.id))];
-  row.ok = row.axe === 0 && row.small === 0 && row.targets === 0 && row.clipped === 0 && row.overlaps === 0 && row.covered === 0 && row.phoneWidth <= 390 && row.errors === 0;
-  add('FAIL', row.ok, `view ${v.hash} is clean (axe ${row.axe} nodes${row.rules.length ? ': ' + row.rules.join(', ') : ''}, text under 12px ${row.small}, targets under 24px ${row.targets}, clipped ${row.clipped}, text over text ${row.overlaps}, text covered ${row.covered}, phone width ${row.phoneWidth}px, script errors ${row.errors}; view-${v.name}.jpg)`);
+  row.ok = row.axe === 0 && row.small === 0 && row.targets === 0 && row.clipped === 0 && row.overlaps === 0 && row.covered === 0 && row.viewAt.every((x) => x?.inView !== false) && row.phoneWidth <= 390 && row.errors === 0;
+  add('FAIL', row.ok, `view ${v.hash} is clean (axe ${row.axe} nodes${row.rules.length ? ': ' + row.rules.join(', ') : ''}, text under 12px ${row.small}, targets under 24px ${row.targets}, clipped ${row.clipped}, text over text ${row.overlaps}, text covered ${row.covered}, target in view ${row.viewAt.every((x) => x?.found && x.inView) ? 'yes' : row.viewAt.some((x) => x && !x.found) ? 'n/a (no element with that id)' : 'no'}, phone width ${row.phoneWidth}px, script errors ${row.errors}; view-${v.name}.jpg)`);
   return row;
 });
 const fails = checks.filter((x) => x.startsWith('FAIL')).length;
