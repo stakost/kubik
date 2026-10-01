@@ -140,6 +140,7 @@ console.log('\n## lint');
   check('lint: an endless animation with no control of its own fails and names frame.md section 7', endless.status === 1 && /frame\.md §7/.test(endless.stdout) && /small control/.test(endless.stdout), endless.stdout);
   check('lint: an endless animation inside a region with [data-motion-toggle] passes', lint('motion-region.html').status === 0, lint('motion-region.html').stdout);
   check('lint: a global .motion-toggle still passes', lint('motion-global.html').status === 0, lint('motion-global.html').stdout);
+  check('lint warns on a page with no text-wrap: balance / pretty, and the sound page has them', /text-wrap: balance on headings/.test(lint('bad.html').stdout) && !/text-wrap/.test(lint('good.html').stdout));
   const deck = run('node', [join(SCRIPTS, 'lint.mjs'), join(FIX, 'deck.html')]);
   check('lint passes the test deck (wheel, swipe, control bar all present)', deck.status === 0, deck.stdout);
   check('lint with no file exits 2', run('node', [join(SCRIPTS, 'lint.mjs')]).status === 2);
@@ -203,6 +204,19 @@ else {
     check('audit: an endless animation with no control fails', /FAIL motion that runs on has its own pause \([1-9]\d* running at 6s; [1-9]\d* without a control/.test(end.stdout) && end.status === 1, line(end));
     check('audit: an endless animation in a region with its own control passes, and pressing it stops it', /PASS motion that runs on has its own pause \([1-9]\d* running at 6s; 0 without a control; 0 still running after pressing\)/.test(reg.stdout), line(reg));
     check('audit: a global .motion-toggle still passes', /PASS motion that runs on has its own pause \([1-9]\d* running at 6s; 0 without a control; 0 still running after pressing\)/.test(glo.stdout), line(glo));
+  }
+  {
+    const fails = (r, re) => re.test(r.stdout) && r.status === 1;
+    const lay = (f, extra = []) => audit(f, ['--quick', ...extra]);
+    const over = lay('layout-text-over-text.html'), cov = lay('layout-covered.html'), flow = lay('layout-flow-image.html'), side = lay('layout-sideways.html'), con = lay('layout-contrast.html');
+    const press = lay('layout-press.html', ['--press', '#open']), unpressed = lay('layout-press.html');
+    check('audit: two texts printed over each other fail, and the pair is named', fails(over, /FAIL no text printed over other text \([1-9]\d* pairs: "13:40" over "14:00"/), over.stdout.split('\n').filter((l) => /over other text/.test(l)).join('\n'));
+    check('audit: text under a block that paints over it fails', fails(cov, /FAIL no text lies under, or runs into, something else \([1-9]\d* covered: "A line that a block now covers" under <div\.lid>/), cov.stdout.split('\n').filter((l) => /something else/.test(l)).join('\n'));
+    check('audit: a picture that has outgrown its row onto the text below fails', fails(flow, /FAIL no text lies under, or runs into, something else .*meets <img> in the flow/), flow.stdout.split('\n').filter((l) => /something else/.test(l)).join('\n'));
+    check('audit: --press opens an overlay and the defect inside it fails; unpressed, the page passes', fails(press, /FAIL no text lies under, or runs into, something else .*after pressing #open/) && /PASS no text lies under/.test(unpressed.stdout) && unpressed.status === 0, press.stdout.split('\n').filter((l) => /something else|press/.test(l)).join('\n'));
+    check('audit: sideways scroll that appears further down the page is found and located', fails(side, /FAIL no sideways scroll on the phone, at any scroll position \(widest 2400px at y \d+\)/), side.stdout.split('\n').filter((l) => /sideways/.test(l)).join('\n'));
+    check('audit: text axe leaves to a human is checked against its backing colour and warned about, as computed', /WARN text axe left to a human .*computed .*"Faint text on a plain page\." 1\.\d+:1 of 4\.5/.test(con.stdout), con.stdout.split('\n').filter((l) => /left to a human/.test(l)).join('\n'));
+    check('audit: --press with no selector exits 2', run('node', [join(SCRIPTS, 'page-audit.mjs'), join(FIX, 'good.html'), '--press']).status === 2);
   }
   const views = audit('views.html', ['--views', '#list,#form']);
   {

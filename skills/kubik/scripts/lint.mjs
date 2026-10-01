@@ -91,6 +91,7 @@ const infinite = /animation[^;]*\binfinite\b|animation-iteration-count\s*:\s*inf
 const motionControl = /data-motion-toggle|motion-toggle/.test(html);
 if (infinite && !motionControl) flag('FAIL', 'motion that never ends, and no small control of its own to stop it (a [data-motion-toggle] button on or beside the moving thing; frame.md §7)');
 else if (/requestAnimationFrame/.test(js) && !motionControl) flag('WARN', 'requestAnimationFrame in the script and no [data-motion-toggle]: if that loop runs on, it needs its own small pause control (frame.md §7); a draw-once effect does not');
+if (/<h[1-6][\s>]/i.test(html) && /<p[\s>]/i.test(html) && !(/text-wrap(-style)?\s*:\s*balance/i.test(css) && /text-wrap(-style)?\s*:\s*pretty/i.test(css))) flag('WARN', 'no text-wrap: balance on headings or text-wrap: pretty on paragraphs: a lone word on the last line is the usual orphan');
 if (/prefers-color-scheme/.test(css) && !/data-theme-switch/.test(html)) flag('WARN', 'two colour schemes in the stylesheet and no theme switch (data-theme-switch buttons; frame.md §7)');
 if (!/:hover/.test(css)) flag('WARN', 'no :hover rule: controls do not answer the pointer');
 if (!/:active/.test(css) && /<button|<a /.test(html)) flag('WARN', 'no :active rule: controls do not answer the press');

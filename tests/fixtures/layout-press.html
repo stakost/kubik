@@ -19,6 +19,9 @@
   button:hover { background: #2340d6; }
   button:active { background: #000; }
   a:focus-visible, button:focus-visible { outline: 3px solid #2340d6; outline-offset: 3px; }
+  dialog { width: 320px; padding: 0; border: 0; overflow: visible; }
+  .vw { display: grid; grid-template-rows: 40px auto; }
+  .vw img { display: block; }
 </style>
 </head>
 <body>
@@ -28,7 +31,10 @@
   <h1>One idea</h1>
   <section id="one"><h2>One</h2><p>Text that can be read.</p><button type="button">Press</button></section>
   <section id="two"><h2>Two</h2><p>More text that can be read.</p></section>
+<button type="button" id="open">Open the viewer</button>
+<dialog id="viewer" aria-label="Viewer"><div class="vw"><div><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23c33'/%3E%3C/svg%3E" alt="" width="200" height="200"></div><p>The caption under the picture.</p></div></dialog>
 </main>
 <footer><p>The end of the page.</p></footer>
+<script>document.getElementById('open').addEventListener('click', function () { document.getElementById('viewer').showModal(); });</script>
 </body>
 </html>

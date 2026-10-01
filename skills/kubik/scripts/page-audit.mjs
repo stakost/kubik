@@ -7,6 +7,10 @@
 // The full run is for a full check on request or a piece about to go public. Before any run, `node lint.mjs <file>` reads the
 // file without a browser and catches what it can in a second.
 //
+// --press "<selector>" clicks that element after the page has been measured, then measures again what
+// the click opened (a gallery viewer, a menu): text over text, text under something else. Repeat it to go
+// one step further each time; every step is photographed as desktop-press-N.jpg and phone-press-N.jpg.
+//
 // --views names further screens of the same page by their hash (a list, a record, a form): each is
 // opened at desktop and phone width, checked with axe and the size rules, and photographed, in the
 // same run. A page with several screens is only as sound as the one nobody looked at.
@@ -39,7 +43,7 @@ import { browserArgs, findBrowser, needNode, noBrowserMessage, NO_BROWSER } from
 const HERE = dirname(fileURLToPath(import.meta.url));
 needNode(22, 'page-audit');
 const args = process.argv.slice(2);
-const USAGE = 'usage: node page-audit.mjs <url-or-html-file> [--out <dir>] [--max <n>] [--chrome <path>] [--views "#a,#b"]';
+const USAGE = 'usage: node page-audit.mjs <url-or-html-file> [--out <dir>] [--max <n>] [--chrome <path>] [--views "#a,#b"] [--press "<selector>"]';
 const stop = (message) => { console.error(message); process.exit(2); };
 const flag = (name, fallback) => {
   if (!args.includes(name)) return fallback;
@@ -58,6 +62,9 @@ const OUT = resolve(flag('--out', './page-audit'));
 const MAX = parseInt(flag('--max', '10'), 10);
 const QUICK = args.includes('--quick');   // desktop and phone only, the default check
 const VIEWS = (flag('--views', '') || '').split(',').map((v) => v.trim()).filter(Boolean).map((v) => (v.startsWith('#') ? v : '#' + v));
+// --press "<selector>" clicks that element before a last measurement (an overlay, a menu, a viewer); repeat it to go deeper
+const PRESS = args.flatMap((a, i) => (a === '--press' ? [args[i + 1]] : []));
+if (args.includes('--press') && PRESS.some((v) => v === undefined || v.startsWith('--'))) stop(`page-audit: --press needs a selector\n${USAGE}`);
 const GIVEN = flag('--chrome', process.env.CHROME_PATH);
 const CHROME = findBrowser(GIVEN);
 if (!CHROME) { console.error(noBrowserMessage('page-audit', GIVEN)); process.exit(NO_BROWSER); }
@@ -255,9 +262,44 @@ const METRICS = `(() => {
   };
 })()`;
 
+// axe leaves text it cannot settle (a background image, an overlap, a fade) as "needs review" and passes the
+// page. For those nodes the backing colour is resolved here from the nearest opaque background-color on the way
+// up; text on an image or a gradient is left to the eye. The number is computed, not measured from pixels.
+function reviewContrast(selectors) {
+  const rgba = (c) => { const m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+%?))?\s*\)/.exec(c); if (!m) return null; const a = m[4] === undefined ? 1 : (m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4])); return [+m[1], +m[2], +m[3], a]; };
+  const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+  const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]));
+  const out = [];
+  for (const sel of selectors) {
+    let el; try { el = document.querySelector(sel); } catch (e) { continue; }
+    if (!el || !(el.textContent || '').trim()) continue;
+    const cs = getComputedStyle(el);
+    let fg = rgba(cs.color); if (!fg) continue;
+    let opacity = 1, layers = [], blocked = false;
+    for (let e = el; e; e = e.parentElement) {
+      const c = getComputedStyle(e);
+      opacity *= parseFloat(c.opacity);
+      if (!blocked) {
+        const bg = rgba(c.backgroundColor);
+        if (c.backgroundImage !== 'none') { blocked = true; break; }
+        if (bg && bg[3] > 0) { layers.push(bg); if (bg[3] >= 1) break; }
+      }
+    }
+    if (blocked || opacity <= 0.01) continue;
+    let back = [255, 255, 255];
+    for (let i = layers.length - 1; i >= 0; i--) back = over(layers[i], back);
+    const ink = over([fg[0], fg[1], fg[2], fg[3] * opacity], back);
+    const l1 = lum(ink), l2 = lum(back), ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    const px = parseFloat(cs.fontSize), bold = parseInt(cs.fontWeight, 10) >= 700;
+    const need = px >= 24 || (px >= 18.66 && bold) ? 3 : 4.5;
+    if (ratio < need) out.push({ sel, ratio: Math.round(ratio * 100) / 100, need, text: el.textContent.trim().replace(/\s+/g, ' ').slice(0, 30) });
+  }
+  return out;
+}
 const AXE_RUN = `axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }, resultTypes: ['violations', 'incomplete'] }).then((r) => ({
   violations: r.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length, sample: v.nodes.slice(0, 4).map((n) => ({ target: n.target.join(' '), why: (n.any[0] || n.all[0] || n.none[0] || {}).message || '' })) })),
   incomplete: r.incomplete.map((v) => ({ id: v.id, nodes: v.nodes.length })),
+  contrastReview: (${reviewContrast.toString()})(((r.incomplete.find((v) => v.id === 'color-contrast') || { nodes: [] }).nodes).slice(0, 600).map((n) => n.target.join(' '))),
 }))`;
 
 // Keyboard walk. Before it, every interactive element is stamped with a signature of the styles a
@@ -296,6 +338,147 @@ async function keyboardWalk(send, limit) {
   return stops;
 }
 
+
+// Layout defects the size rules cannot see, measured inside the page. Serialised into the page, so it
+// takes nothing from this file. opt: { overlap, cover }.
+function layoutProbe(opt) {
+  const d = document, W = innerWidth, H = innerHeight;
+  const modal = [...d.querySelectorAll('dialog[open], [aria-modal="true"]')].find((m) => { const r = m.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(m).visibility !== 'hidden'; });
+  const scope = modal || d.body;
+  const SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE|OPTION|TEXTAREA)$/;
+  const clipCache = new Map(), okCache = new Map();
+  const clips = (el) => {
+    if (!el || el === d.documentElement) return [];
+    if (clipCache.has(el)) return clipCache.get(el);
+    const cs = getComputedStyle(el);
+    const own = (cs.overflowX !== 'visible' || cs.overflowY !== 'visible') && el !== d.body ? [el.getBoundingClientRect()] : [];
+    const all = own.concat(clips(el.parentElement));
+    clipCache.set(el, all);
+    return all;
+  };
+  const shown = (el) => {
+    if (okCache.has(el)) return okCache.get(el);
+    let ok = !SKIP.test(el.tagName);   // aria-hidden text is still drawn: the labels of a figure are often hidden from the reader of the tree
+    if (ok && el.checkVisibility) ok = el.checkVisibility({ contentVisibilityAuto: true, visibilityProperty: true, opacityProperty: true });
+    if (ok) { const cs = getComputedStyle(el); const m = /^rgba\(.*,\s*([\d.]+)\)$/.exec(cs.color); ok = parseFloat(cs.fontSize) > 0 && !(m && parseFloat(m[1]) === 0); }
+    okCache.set(el, ok);
+    return ok;
+  };
+  const items = [];
+  const walker = d.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+  const range = d.createRange();
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (!n.textContent.trim()) continue;
+    const el = n.parentElement;
+    if (!el || !shown(el)) continue;
+    range.selectNodeContents(n);
+    const cl = clips(el);
+    for (const r of range.getClientRects()) {
+      if (r.width < 2 || r.height < 2) continue;
+      if (cl.some((c) => r.right <= c.left + 1 || r.left >= c.right - 1 || r.bottom <= c.top + 1 || r.top >= c.bottom - 1)) continue;   // clipped away by an overflow box
+      items.push({ el, l: r.left, t: r.top, r: r.right, b: r.bottom, text: n.textContent.trim().replace(/\s+/g, ' ').slice(0, 30) });
+    }
+  }
+  // hit(it): is this text line really on top at some point of it? null when no sample lies inside the window.
+  const sample = (it) => { const y = (it.t + it.b) / 2, w = it.r - it.l, pad = Math.min(3, w / 2); return [it.l + pad, (it.l + it.r) / 2, it.r - pad].filter((x) => x >= 0 && x <= W && y >= 0 && y <= H).map((x) => [x, y]); };
+  const related = (top, el) => top === el || el.contains(top) || top.contains(el);
+  const hit = (it) => { const pts = sample(it); if (!pts.length) return null; return pts.some(([x, y]) => { const top = d.elementFromPoint(x, y); return !top || related(top, it.el); }); };
+  // two layers stacked in one place (a pager, a cross-fade, a pinned stack of scenes) hide each other on purpose:
+  // the branches under the nearest common ancestor have the same box
+  const layers = (a, b) => {
+    const up = []; for (let e = a; e; e = e.parentElement) up.push(e);
+    let x = b, prev = b; while (x && !up.includes(x)) { prev = x; x = x.parentElement; }
+    if (!x || x === a || x === b) return false;
+    const pa = up[up.indexOf(x) - 1];
+    if (!pa || !prev) return false;
+    const ra = pa.getBoundingClientRect(), rb = prev.getBoundingClientRect();
+    // a scene mid-transition is scaled or shifted a little: the same box within a tenth
+    const tol = (m) => Math.max(3, m * 0.1);
+    return Math.abs(ra.left + ra.width / 2 - rb.left - rb.width / 2) < tol(ra.width) && Math.abs(ra.top + ra.height / 2 - rb.top - rb.height / 2) < tol(ra.height) && Math.abs(ra.width - rb.width) < tol(ra.width) && Math.abs(ra.height - rb.height) < tol(ra.height);
+  };
+  // a bar fixed or stuck to the window is chrome that content scrolls under: it covers by design
+  const chrome = (el) => { for (let e = el; e && e !== d.documentElement; e = e.parentElement) { const p = getComputedStyle(e).position; if (p === 'fixed' || p === 'sticky') return e; } return null; };
+  const out = { runs: items.length, overlaps: [], covered: [] };
+  const where = (it) => Math.round(it.t + scrollY);
+  if (opt.overlap) {
+    // a line box is taller than its glyphs (tight display type overlaps its own lines by design), so compare the middle 60%
+    const boxes = items.map((it) => { const h = it.b - it.t; return { it, l: it.l, r: it.r, t: it.t + h * 0.2, b: it.b - h * 0.2 }; }).sort((a, b) => a.l - b.l);
+    const seen = new Set();
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length && boxes[j].l < boxes[i].r - 2; j++) {
+        const a = boxes[i], b = boxes[j];
+        if (a.it.el === b.it.el || a.it.el.contains(b.it.el) || b.it.el.contains(a.it.el)) continue;
+        if (Math.min(a.r, b.r) - Math.max(a.l, b.l) < 2 || Math.min(a.b, b.b) - Math.max(a.t, b.t) < 2) continue;
+        if (hit(a.it) !== true || hit(b.it) !== true || layers(a.it.el, b.it.el)) continue;
+        const ca = chrome(a.it.el), cb = chrome(b.it.el);
+        if ((ca && !ca.contains(b.it.el)) || (cb && !cb.contains(a.it.el))) continue;   // text scrolling under a bar stuck to the window   // both lines must really show, and not be scenes of one stack
+        if (a.it.text === b.it.text) continue;   // the same words twice are a layered copy (a ghost, a shadow, a clone), not two texts
+        const key = a.it.text + '|' + b.it.text;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.overlaps.push(JSON.stringify(a.it.text) + ' over ' + JSON.stringify(b.it.text) + ' at y ' + where(a.it));
+      }
+    }
+  }
+  if (opt.cover) {
+    const paints = (el) => {
+      if (el.ownerSVGElement) return true;   // a shape drawn inside a drawing; the drawing's own box (the root) paints nothing where no shape is
+      if (/^(IMG|CANVAS|VIDEO|PICTURE|IFRAME|OBJECT)$/i.test(el.tagName)) return true;
+      const cs = getComputedStyle(el);
+      const m = /rgba?\(\s*[\d.]+,\s*[\d.]+,\s*[\d.]+(?:,\s*([\d.]+))?\)/.exec(cs.backgroundColor);
+      return (m && (m[1] === undefined || parseFloat(m[1]) >= 0.5)) || cs.backgroundImage !== 'none';
+    };
+    const seen = new Set();
+    for (const it of items) {
+      if (it.r < 0 || it.l > W || it.b < 0 || it.t > H) continue;
+      const y = (it.t + it.b) / 2; if (y < 0 || y > H) continue;
+      const w = it.r - it.l, pad = Math.min(3, w / 2);
+      for (const x of [it.l + pad, (it.l + it.r) / 2, it.r - pad]) {
+        if (x < 0 || x > W) continue;
+        const top = d.elementFromPoint(x, y);
+        if (!top || top === it.el || it.el.contains(top) || top.contains(it.el)) continue;
+        if (!paints(top) || (top.checkVisibility && !top.checkVisibility({ opacityProperty: true }))) continue;
+        const f = chrome(top); if (f && !f.contains(it.el)) continue;
+        if (layers(top, it.el)) continue;
+        const key = it.text + '|' + Math.round(it.t);
+        if (!seen.has(key)) { seen.add(key); out.covered.push(JSON.stringify(it.text) + ' under <' + top.tagName.toLowerCase() + (top.className && typeof top.className === 'string' ? '.' + top.className.trim().split(/\s+/)[0] : '') + '> at y ' + where(it)); }
+        break;
+      }
+    }
+  }
+  if (opt.cover) {
+    // a picture and a line of text that meet where both sit in the normal flow: a grid row too short for its image, a frame taller than its cell.
+    // Text laid over a picture on purpose is placed (absolute, fixed, sticky, transformed) or lives in the picture's own wrapper (a caption on a card), and is left alone:
+    // what is reported is a picture that has outgrown its wrapper onto text that belongs to another box.
+    const placed = (el, stop) => { for (let e = el; e && e !== stop; e = e.parentElement) { const c = getComputedStyle(e); if (/^(absolute|fixed|sticky)$/.test(c.position) || c.transform !== 'none' || (c.translate && c.translate !== 'none')) return true; } return false; };
+    const pics = [...scope.querySelectorAll('img, video, canvas')].filter((e) => { const r = e.getBoundingClientRect(); return r.width >= 24 && r.height >= 24 && r.bottom > 0 && r.top < H && (!e.checkVisibility || e.checkVisibility({ opacityProperty: true, visibilityProperty: true })); });
+    const seenP = new Set();
+    for (const P of pics) {
+      // only the part of the picture that shows: a frame parked outside an overflow box does not meet anything
+      const pr = P.getBoundingClientRect(), wrap = P.parentElement;
+      if (!wrap) continue;
+      let vl = pr.left, vt = pr.top, vr = pr.right, vb = pr.bottom;
+      for (const c of clips(P)) { vl = Math.max(vl, c.left); vt = Math.max(vt, c.top); vr = Math.min(vr, c.right); vb = Math.min(vb, c.bottom); }
+      if (vr - vl < 8 || vb - vt < 8) continue;
+      const wr = wrap.getBoundingClientRect();
+      for (const it of items) {
+        if (it.b < 0 || it.t > H || P.contains(it.el) || it.el.contains(P) || wrap.contains(it.el)) continue;
+        const cx = (it.l + it.r) / 2, cy = (it.t + it.b) / 2;
+        if (cx >= wr.left && cx <= wr.right && cy >= wr.top && cy <= wr.bottom) continue;
+        const h = it.b - it.t, t = it.t + h * 0.2, b = it.b - h * 0.2;
+        if (Math.min(it.r, vr - 2) - Math.max(it.l, vl + 2) < 2 || Math.min(b, vb - 2) - Math.max(t, vt + 2) < 2) continue;
+        let lca = P.parentElement; while (lca && !lca.contains(it.el)) lca = lca.parentElement;
+        if (!lca || placed(P, lca) || placed(it.el, lca)) continue;
+        const key = it.text + '|' + Math.round(it.t);
+        if (!seenP.has(key)) { seenP.add(key); out.covered.push(JSON.stringify(it.text) + ' meets <' + P.tagName.toLowerCase() + '> in the flow at y ' + where(it)); }
+      }
+    }
+  }
+  out.modal = !!modal;
+  return out;
+}
+const LAYOUT = (opt) => `(${layoutProbe.toString()})(${JSON.stringify(opt)})`;
+
 // Press every region's control (and the global one) and count what still runs.
 const MOTION_TEST = `(async () => {
   const toggles = [...document.querySelectorAll('[data-motion-toggle]')];
@@ -306,7 +489,7 @@ const MOTION_TEST = `(async () => {
   return { after: document.getAnimations().filter((a) => a.playState === 'running').length, toggles: toggles.length, global: !!global };
 })()`;
 
-async function run(kind, { width, height, mobile, media = [], audit = true, shots = true, single = null, walk = false, at = url, scriptOff = false }) {
+async function run(kind, { width, height, mobile, media = [], audit = true, shots = true, single = null, walk = false, at = url, scriptOff = false, press = [], layoutProbes = audit }) {
   const { send, events, close } = await openTarget();
   await send('Page.enable'); await send('Runtime.enable'); await send('Log.enable');
   if (scriptOff) await send('Emulation.setScriptExecutionDisabled', { value: true });
@@ -314,7 +497,12 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
   if (media.length) await send('Emulation.setEmulatedMedia', { features: media });
   const nav = await send('Page.navigate', { url: at });
   if (nav?.errorText) throw new Error(`could not load ${at}: ${nav.errorText}`);
-  await sleep(6000);   // what still moves now has outlived the 5 s that need no control (frame.md §7)
+  const evalIn = async (expression) => { const r = await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression }); return r.result?.value ?? null; };
+  // two moments, ~3 s and ~6 s: a figure that places text on a timer is seen at both, and only at those two
+  await sleep(3000);
+  const early = await evalIn(METRICS);
+  const earlyLayout = !layoutProbes ? null : await evalIn(LAYOUT({ overlap: true, cover: false }));
+  await sleep(3000);   // what still moves now has outlived the 5 s that need no control (frame.md §7)
   const shot = async (file) => {
     const s = await send('Page.captureScreenshot', { format: 'jpeg', quality: 78 });
     if (!s || !s.data) throw new Error(`the browser gave no screenshot for ${file} (${s && s.timedOut ? 'timed out: a stylesheet, font or script may be waiting on a network that does not answer' : 'no data'})`);
@@ -323,6 +511,29 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
   const out = { files: [] };
   const m = await send('Runtime.evaluate', { returnByValue: true, expression: METRICS });
   out.metrics = m.result?.value ?? { error: JSON.stringify(m).slice(0, 400) };
+  if (early && out.metrics.clippedText !== undefined) {
+    out.metrics.clippedTextSample = [...new Set([...(out.metrics.clippedTextSample ?? []), ...(early.clippedTextSample ?? [])])];
+    out.metrics.clippedText = Math.max(out.metrics.clippedText, early.clippedText ?? 0);
+  }
+  const lay = !layoutProbes ? null : await evalIn(LAYOUT({ overlap: true, cover: true }));
+  const layout = { overlaps: [...new Set([...(earlyLayout?.overlaps ?? []), ...(lay?.overlaps ?? [])])], covered: [...(lay?.covered ?? [])], pressed: [], scrollMax: { w: out.metrics.scrollWidth ?? 0, y: 0 } };
+  out.layout = layout;
+  if (layoutProbes) {
+    // Sections the page renders lazily (content-visibility, reveals) exist only near the viewport: walk the whole page, one screen at a time, and probe each stop.
+    const total0 = out.metrics.pageHeight ?? height;
+    for (let y = height; y < total0 && y < height * 60; y += Math.round(height * 0.85)) {
+      await evalIn(`window.scrollTo({ top: ${y}, behavior: 'instant' })`);
+      await sleep(650);   // a section's own reveal finishes before it is looked at
+      const sw = await evalIn('Math.max(document.documentElement.scrollWidth, document.body.scrollWidth)');
+      if (sw > layout.scrollMax.w) layout.scrollMax = { w: sw, y };
+      const more = await evalIn(LAYOUT({ overlap: true, cover: true }));
+      for (const o of more?.overlaps ?? []) if (!layout.overlaps.includes(o)) layout.overlaps.push(o);
+      for (const c of more?.covered ?? []) if (!layout.covered.includes(c)) layout.covered.push(c);
+    }
+    await evalIn("window.scrollTo({ top: 0, behavior: 'instant' })");
+    await sleep(300);
+  }
+  // axe last: the walk above has fired the page's reveals, and axe skips text that is still faded out
   if (audit) {
     await send('Runtime.evaluate', { expression: AXE });
     const a = await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: AXE_RUN });
@@ -337,6 +548,9 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
       const y = n === 1 ? 0 : Math.round((span * i) / (n - 1));
       await send('Runtime.evaluate', { expression: `window.scrollTo({ top: ${y}, behavior: 'instant' })` });
       await sleep(i === 0 ? 200 : 1100);
+      const sw = await evalIn('Math.max(document.documentElement.scrollWidth, document.body.scrollWidth)');
+      if (sw > layout.scrollMax.w) layout.scrollMax = { w: sw, y };
+      if (i > 0) { const more = await evalIn(LAYOUT({ overlap: false, cover: true })); for (const c of more?.covered ?? []) if (!layout.covered.includes(c)) layout.covered.push(c); }
       const f = `${kind}-${String(y).padStart(5, '0')}.jpg`;
       await shot(f); out.files.push(f);
     }
@@ -346,6 +560,13 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
     out.walk = await keyboardWalk(send, out.walkCap);
     const pz = await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: MOTION_TEST });
     out.pause = pz.result?.value ?? { after: 0, toggles: 0, global: false };
+  }
+  for (let i = 0; i < press.length; i++) {
+    const ok = await evalIn(`(() => { const el = document.querySelector(${JSON.stringify(press[i])}); if (!el) return false; el.scrollIntoView({ block: 'center' }); el.click(); return true; })()`);
+    await sleep(1600);   // an overlay's own entrance settles before it is measured
+    const l = await evalIn(LAYOUT({ overlap: true, cover: true }));
+    const f = `${kind}-press-${i + 1}.jpg`; await shot(f); out.files.push(f);
+    layout.pressed.push({ selector: press[i], found: !!ok, overlaps: l?.overlaps ?? [], covered: l?.covered ?? [], modal: !!l?.modal });
   }
   out.dialogs = events.filter((e) => e.method === 'Page.javascriptDialogOpening').length;
   out.errors =[...new Set(events.filter((e) => e.method === 'Runtime.exceptionThrown' || (e.method === 'Log.entryAdded' && e.params.entry.level === 'error' && !/favicon/.test(e.params.entry.url ?? '')))
@@ -357,9 +578,9 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
 let result;
 try {
   await waitForChrome();
-  const desktop = await run('desktop', { width: 1440, height: 900, mobile: false, walk: true });
-  const phone = await run('phone', { width: 390, height: 800, mobile: true });
-  const dark = QUICK ? { axe: { violations: [] }, files: [] } : await run('dark', { width: 1440, height: 900, mobile: false, media: [{ name: 'prefers-color-scheme', value: 'dark' }], shots: false, single: 'desktop-dark.jpg' });
+  const desktop = await run('desktop', { width: 1440, height: 900, mobile: false, walk: true, press: PRESS });
+  const phone = await run('phone', { width: 390, height: 800, mobile: true, press: PRESS });
+  const dark = QUICK ? { axe: { violations: [] }, files: [] } : await run('dark', { width: 1440, height: 900, mobile: false, media: [{ name: 'prefers-color-scheme', value: 'dark' }], shots: false, single: 'desktop-dark.jpg', layoutProbes: false });
   const reduced = QUICK ? { metrics: { animationsRunning: 0, animationsInfinite: 0 }, files: [] } : await run('reduced', { width: 1440, height: 900, mobile: false, media: [{ name: 'prefers-reduced-motion', value: 'reduce' }], audit: false, shots: false, single: 'desktop-reduced-motion.jpg' });
   // the full run also looks at a tablet, and at the page with its script off: a reader whose script failed sees the same words
   const tablet = QUICK ? null : await run('tablet', { width: 1024, height: 768, mobile: false, shots: false, single: 'tablet-00000.jpg' });
@@ -372,7 +593,7 @@ try {
     const narrow = await run('view', { width: 390, height: 800, mobile: true, shots: false, single: `view-${name}-phone.jpg`, at });
     views.push({ hash, name, wide, narrow });
   }
-  result = { url, desktop, phone, dark: { axe: dark.axe, files: dark.files }, reducedMotion: { animationsRunning: reduced.metrics.animationsRunning, animationsInfinite: reduced.metrics.animationsInfinite, files: reduced.files }, tablet: tablet ? { axe: tablet.axe, scrollWidth: tablet.metrics.scrollWidth, textUnder12px: tablet.metrics.textUnder12px, files: tablet.files } : null, noscript: noscript ? { chars: noscript.metrics.visibleTextChars ?? 0, errors: noscript.errors, files: noscript.files } : null, views };
+  result = { url, desktop, phone, dark: { axe: dark.axe, files: dark.files }, reducedMotion: { animationsRunning: reduced.metrics.animationsRunning, animationsInfinite: reduced.metrics.animationsInfinite, files: reduced.files }, tablet: tablet ? { axe: tablet.axe, layout: tablet.layout, scrollWidth: tablet.metrics.scrollWidth, textUnder12px: tablet.metrics.textUnder12px, files: tablet.files } : null, noscript: noscript ? { chars: noscript.metrics.visibleTextChars ?? 0, errors: noscript.errors, files: noscript.files } : null, views };
 } catch (e) {
   console.error('page-audit: ' + e.message);
   process.exitCode = /did not start|no screenshot|could not load/.test(e.message) ? NO_BROWSER : 2;
@@ -427,13 +648,27 @@ const checks = [];
 const add = (level, ok, text) => checks.push(`${ok ? 'PASS' : level} ${text}`);
 add('FAIL', result.desktop.errors.length + result.phone.errors.length === 0, 'no script errors');
 add('FAIL', (result.desktop.dialogs ?? 0) + (result.phone.dialogs ?? 0) === 0, `the page opens no alert, confirm or prompt (${(result.desktop.dialogs ?? 0) + (result.phone.dialogs ?? 0)} opened)`);
-add('FAIL', p.scrollWidth <= 390, `no sideways scroll on the phone (scroll width ${p.scrollWidth}px)`);
+const sidewaysOf = (r, base) => { const m = r.layout?.scrollMax ?? { w: r.metrics.scrollWidth, y: 0 }; return { w: Math.max(m.w, r.metrics.scrollWidth), y: m.y, base }; };
+const sp = sidewaysOf(result.phone, 390), sd = sidewaysOf(result.desktop, 1440);
+add('FAIL', sp.w <= 390, `no sideways scroll on the phone, at any scroll position (widest ${sp.w}px${sp.w > 390 ? ' at y ' + sp.y : ''})`);
+add('FAIL', sd.w <= 1440, `no sideways scroll at desktop width, at any scroll position (widest ${sd.w}px${sd.w > 1440 ? ' at y ' + sd.y : ''})`);
+// layout probes: every width the audit renders (desktop, phone, tablet in the full run), and every press
+const LAYOUTS = [['desktop', result.desktop.layout], ['phone', result.phone.layout], ['tablet', result.tablet?.layout]].filter(([, l]) => l);
+for (const [w, l] of LAYOUTS) for (const q of l.pressed ?? []) LAYOUTS.push([`${w} after pressing ${q.selector}`, q]);
+const sum = (key) => LAYOUTS.reduce((n, [, l]) => n + (l[key]?.length ?? 0), 0);
+const first = (key) => LAYOUTS.flatMap(([w, l]) => (l[key] ?? []).map((x) => x + ' (' + w + ')')).slice(0, 3).join('; ');
+const missed = LAYOUTS.filter(([, l]) => l.found === false).map(([w]) => w);
+add('FAIL', sum('overlaps') === 0, `no text printed over other text (${sum('overlaps')} pairs${sum('overlaps') ? ': ' + first('overlaps') : ''})`);
+add('FAIL', sum('covered') === 0, `no text lies under, or runs into, something else (${sum('covered')} covered${sum('covered') ? ': ' + first('covered') : ''}; fixed bars are exempt; open an overlay with --press)`);
+if (PRESS.length) add('WARN', missed.length === 0, `every --press selector matched an element${missed.length ? ' (not found: ' + missed.join('; ') + ')' : ''}`);
 add('FAIL', nodes(result.desktop.axe) === 0, `axe clean at desktop (${nodes(result.desktop.axe)} nodes)`);
 add('FAIL', nodes(result.phone.axe) === 0, `axe clean on the phone (${nodes(result.phone.axe)} nodes)`);
 add('FAIL', nodes(result.dark.axe) === 0, `axe clean in the dark scheme (${nodes(result.dark.axe)} nodes)`);
+const review = [...(result.desktop.axe?.contrastReview ?? []).map((x) => ({ ...x, at: 'desktop' })), ...(result.phone.axe?.contrastReview ?? []).map((x) => ({ ...x, at: 'phone' }))];
+add('WARN', review.length === 0, `text axe left to a human has the contrast it needs (${review.length} under; computed from the nearest opaque background colour, not measured${review.length ? ': ' + review.slice(0, 3).map((x) => JSON.stringify(x.text) + ' ' + x.ratio + ':1 of ' + x.need + ' (' + x.at + ')').join('; ') : ''})`);
 add('FAIL', d.textUnder12px === 0 && p.textUnder12px === 0, `no text under 12px (desktop ${d.textUnder12px}, phone ${p.textUnder12px})`);
 add('FAIL', d.targetsUnder24px === 0 && p.targetsUnder24px === 0, `no target under 24px (desktop ${d.targetsUnder24px}, phone ${p.targetsUnder24px})`);
-add('FAIL', d.clippedText === 0 && p.clippedText === 0, `no clipped text (desktop ${d.clippedText}, phone ${p.clippedText})`);
+add('FAIL', d.clippedText === 0 && p.clippedText === 0, `no clipped text (desktop ${d.clippedText}, phone ${p.clippedText}; sampled at 3 s and 6 s, so a timed figure is seen at those two moments only)`);
 add('WARN', (d.textEscapes ?? 0) === 0 && (p.textEscapes ?? 0) === 0, `text stays inside the shape drawn around it (desktop ${d.textEscapes ?? 0}, phone ${p.textEscapes ?? 0}${(d.textEscapes || p.textEscapes) ? ': ' + [...(d.textEscapesSample ?? []), ...(p.textEscapesSample ?? [])].slice(0, 6).join('; ') : ''}; a badge or a sticker takes its size from its words, frame.md §3)`);
 add('FAIL', d.h1Count === 1 && d.headingLevelSkips === 0, `one h1 and no skipped heading level (h1 x${d.h1Count}, skips ${d.headingLevelSkips})`);
 add('FAIL', d.landmarks.main === 1 && !!d.lang, `a main landmark and a lang attribute (main x${d.landmarks.main}, lang ${d.lang})`);
@@ -470,10 +705,11 @@ const VIEW_ROWS = (result.views ?? []).map((v) => {
   const w = v.wide.metrics, n = v.narrow.metrics;
   const row = { hash: v.hash, axe: nodes(v.wide.axe) + nodes(v.narrow.axe), small: (w.textUnder12px ?? 0) + (n.textUnder12px ?? 0),
     targets: (w.targetsUnder24px ?? 0) + (n.targetsUnder24px ?? 0), clipped: (w.clippedText ?? 0) + (n.clippedText ?? 0),
+    overlaps: (v.wide.layout?.overlaps.length ?? 0) + (v.narrow.layout?.overlaps.length ?? 0), covered: (v.wide.layout?.covered.length ?? 0) + (v.narrow.layout?.covered.length ?? 0),
     phoneWidth: n.scrollWidth ?? 0, errors: v.wide.errors.length + v.narrow.errors.length };
   row.rules = [...new Set([...(v.wide.axe?.violations ?? []), ...(v.narrow.axe?.violations ?? [])].map((x) => x.id))];
-  row.ok = row.axe === 0 && row.small === 0 && row.targets === 0 && row.clipped === 0 && row.phoneWidth <= 390 && row.errors === 0;
-  add('FAIL', row.ok, `view ${v.hash} is clean (axe ${row.axe} nodes${row.rules.length ? ': ' + row.rules.join(', ') : ''}, text under 12px ${row.small}, targets under 24px ${row.targets}, clipped ${row.clipped}, phone width ${row.phoneWidth}px, script errors ${row.errors}; view-${v.name}.jpg)`);
+  row.ok = row.axe === 0 && row.small === 0 && row.targets === 0 && row.clipped === 0 && row.overlaps === 0 && row.covered === 0 && row.phoneWidth <= 390 && row.errors === 0;
+  add('FAIL', row.ok, `view ${v.hash} is clean (axe ${row.axe} nodes${row.rules.length ? ': ' + row.rules.join(', ') : ''}, text under 12px ${row.small}, targets under 24px ${row.targets}, clipped ${row.clipped}, text over text ${row.overlaps}, text covered ${row.covered}, phone width ${row.phoneWidth}px, script errors ${row.errors}; view-${v.name}.jpg)`);
   return row;
 });
 const fails = checks.filter((x) => x.startsWith('FAIL')).length;

@@ -19,6 +19,8 @@
   button:hover { background: #2340d6; }
   button:active { background: #000; }
   a:focus-visible, button:focus-visible { outline: 3px solid #2340d6; outline-offset: 3px; }
+  .axis { position: relative; height: 32px; }
+  .axis span { position: absolute; top: 0; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -28,6 +30,7 @@
   <h1>One idea</h1>
   <section id="one"><h2>One</h2><p>Text that can be read.</p><button type="button">Press</button></section>
   <section id="two"><h2>Two</h2><p>More text that can be read.</p></section>
+<div class="axis"><span style="left: 0">13:40</span><span style="left: 14px">14:00</span></div>
 </main>
 <footer><p>The end of the page.</p></footer>
 </body>

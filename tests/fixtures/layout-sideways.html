@@ -19,6 +19,7 @@
   button:hover { background: #2340d6; }
   button:active { background: #000; }
   a:focus-visible, button:focus-visible { outline: 3px solid #2340d6; outline-offset: 3px; }
+  .gap { height: 2600px; }
 </style>
 </head>
 <body>
@@ -28,7 +29,9 @@
   <h1>One idea</h1>
   <section id="one"><h2>One</h2><p>Text that can be read.</p><button type="button">Press</button></section>
   <section id="two"><h2>Two</h2><p>More text that can be read.</p></section>
+<div class="gap"></div><p>The end.</p>
 </main>
 <footer><p>The end of the page.</p></footer>
+<script>addEventListener('scroll', function () { if (scrollY > 400 && !document.getElementById('wide')) { var w = document.createElement('div'); w.id = 'wide'; w.style.cssText = 'width:2400px;height:10px'; document.body.appendChild(w); } });</script>
 </body>
 </html>

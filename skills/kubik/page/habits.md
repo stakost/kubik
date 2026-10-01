@@ -26,6 +26,7 @@ starts to feel like every other page.
 - A section heading on the left with a small paragraph floating at the top right, aligned to
   nothing.
 - Hairlines above and below every row of a long list.
+- One block of the page set on its own left edge, a few pixels off the column the rest keep. The column has one left edge and every block starts on it; a wider block is wider on both sides.
 - Lines and crosshairs drawn only to look technical.
 - Text turned ninety degrees along an edge, for no reason the content gives.
 - Bars with a filled track behind them, for a comparison of two numbers.

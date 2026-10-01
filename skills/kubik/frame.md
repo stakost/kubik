@@ -102,6 +102,10 @@ delivery limits (one static file, an email, a sandbox with a content security po
   - *A mark that covers what it points at.* An annotation lies above the thing it annotates and
     beside its words, never across them; a drawn circle around a thing has that thing inside it
     at every width, or it is not drawn at that width.
+  - *Labels that touch.* A drawn figure's labels are thinned by measured pixels at the width in
+    front of you (a tick that would meet its neighbour is dropped, a label that would leave its
+    lane moves inside it), never by a percentage that held at one width. Every figure keeps its
+    first and last label and the one the reader came for; the audit finds text printed over text.
 - A drawing with a `viewBox` scales its text with its width: a 14px label at 1440 is 6px on a phone.
   Below a tablet width the drawing gets a second form (its labels as text beside it, or a short
   table), or its text is sized in the page's units, not the drawing's.
@@ -118,6 +122,13 @@ delivery limits (one static file, an email, a sandbox with a content security po
 - A wide table that scrolls inside its container says so (a shadow edge or a caption) and keeps
   its first column fixed; four columns of nineteen with no sign of the rest is the empty form.
 - Hover and pointer physics sit inside `@media (hover: hover) and (pointer: fine)`.
+- Cards in a row share a height, or their text aligns across the row.
+- A navigation that does not fit says so (a visible edge, a count, a menu); a fade marks only a
+  list that really overflows, never one that fits. What stays is a nav that can be longer than
+  the screen.
+- A frame that holds a picture (a viewer, a lightbox) fits the picture whatever its orientation:
+  the picture is scaled to the room that is left after the text and the controls, and the text
+  never lies under or over it. `--press` opens one for the audit.
 
 - The three usual causes of a page wider than a phone: a headline held together with a
   non-breaking space or `nowrap`; an element positioned off screen with no `overflow: clip` on an
@@ -170,6 +181,11 @@ How a piece behaves is part of what the reader needs, and it is designed like ev
   paused, what was copied.
 - **Controls are found without a manual.** The buttons are visible, or a short hint names the keys
   once. A shortcut is never the only way to do something.
+- **A demonstration yields to the reader at the first touch.** A sample that plays by itself (a
+  sweeping slider, a bouncing handle) stops at the first press or key, not after the first move,
+  so a press-and-drag never fights it.
+- **What can be dragged does not select text**, and a focus ring follows the shape it marks (the
+  die, the round button), not a box around its hit area.
 - **One gesture has one meaning, and nothing is taken hostage.** A wheel that turns slides does not
   also scroll the page under them; where the content itself scrolls, the wheel belongs to the
   content. A gesture you take over has a cooldown, so one flick of a trackpad is one step, and it
@@ -240,7 +256,8 @@ A page nobody rendered is a draft.
 2. **Run the audit once, when the piece is built**: `node <kubik>/scripts/page-audit.mjs
    <url-or-file> --quick --out <dir>`, with `--out` a directory of its own
    (add `--views "#list,#record,#form"` when the piece has several screens behind one address:
-   each is checked and photographed in the same run). It
+   each is checked and photographed in the same run; add `--press "<selector>"`, repeated, for an
+   overlay or a menu the piece opens, so what it opens is measured too). It
    takes screenshots at every width it renders, runs axe-core, walks the page with the Tab key, presses the motion
    controls, and prints two lists; open its screenshots and scroll through all of them as a
    stranger would. The quick run covers desktop and phone. The full run (drop `--quick`) adds the
