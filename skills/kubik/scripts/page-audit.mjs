@@ -161,6 +161,11 @@ const METRICS = `(() => {
   const anims = d.getAnimations();
   const running = anims.filter((a) => a.playState === 'running');
   const infinite = running.filter((a) => a.effect && a.effect.getComputedTiming().iterations === Infinity);
+  // what still runs ~6 s after load: is its target inside a region some [data-motion-toggle] controls?
+  const regionOf = (b) => { const id = b.getAttribute('aria-controls'); return (id && d.getElementById(id)) || b.closest('[data-motion]'); };
+  const regions = [...d.querySelectorAll('[data-motion-toggle]')].map(regionOf).filter(Boolean);
+  const globalToggle = !!d.querySelector('.motion-toggle');
+  const uncontrolled = running.filter((a) => { const t = a.effect && a.effect.target; const el = t && t.nodeType === 1 ? t : (t && t.parentElement); return !globalToggle && !(el && regions.some((r) => r.contains(el))); }).length;
   const anchors = [...d.querySelectorAll('a[href^="#"]')].filter((a) => a.getAttribute('href').length > 1);
   const deadAnchors = [...new Set(anchors.filter((a) => !d.getElementById(a.getAttribute('href').slice(1))).map((a) => a.getAttribute('href')))];
   const navAnchors = [...new Set([...d.querySelectorAll('nav a[href^="#"], header a[href^="#"]')].filter((a) => a.getAttribute('href').length > 1).map((a) => a.getAttribute('href')))];
@@ -180,7 +185,6 @@ const METRICS = `(() => {
   const declared = new Set([...d.fonts].filter((ff) => ff.status === 'loaded').map((ff) => ff.family.replace(/["']/g, '')));
   const anyDeclared = (f) => [...d.fonts].some((ff) => ff.family.replace(/["']/g, '') === f);
   const fontsMissing = [...new Set(probes.filter(([f, sample, face]) => f && !generic.test(f) && !declared.has(f) && (anyDeclared(f) || !d.fonts.check(face + ' 16px "' + f + '"', sample) || /^(Inter|Roboto|Open Sans|Lato|Montserrat|Geist|Manrope|Fraunces|Playfair Display|IBM Plex|Source Serif|Golos|Unbounded|Syne|Archivo|Outfit|Sora|Bricolage|Instrument|Familjen|Newsreader|Literata|Spectral|Public Sans|Figtree|JetBrains Mono|Cormorant|EB Garamond|Anton)/i.test(f))).map((x) => x[0]))];
-  const pauseControl = !!d.querySelector('.motion-toggle') || [...d.querySelectorAll('button, [role=button]')].some((b) => /pause|stop|play|пауз|останов|движени|анимаци/i.test((b.getAttribute('aria-label') || '') + ' ' + b.textContent));
   return {
     viewport: innerWidth + 'x' + innerHeight,
     scrollWidth: Math.max(d.documentElement.scrollWidth, d.body.scrollWidth),
@@ -209,7 +213,9 @@ const METRICS = `(() => {
     bodyFontSize: getComputedStyle(d.body).fontSize,
     animationsRunning: running.length,
     animationsInfinite: infinite.length,
-    pauseControl,
+    motionToggles: d.querySelectorAll('[data-motion-toggle]').length,
+    globalToggle,
+    animationsUncontrolled: uncontrolled,
     canvasCount: d.querySelectorAll('canvas').length,
     svgCount: d.querySelectorAll('svg').length,
     svgNotHiddenNorLabelled: [...d.querySelectorAll('svg')].filter((s) => s.getAttribute('aria-hidden') !== 'true' && !s.getAttribute('aria-label') && !s.getAttribute('aria-labelledby') && !s.getAttribute('role') && !s.closest('[aria-hidden="true"]') && !s.querySelector('title')).length,
@@ -290,17 +296,14 @@ async function keyboardWalk(send, limit) {
   return stops;
 }
 
-// Press the pause control and see whether endless animation actually stops.
-const PAUSE_TEST = `(async () => {
-  const endless = () => document.getAnimations().filter((a) => a.playState === 'running' && a.effect && a.effect.getComputedTiming().iterations === Infinity).length;
-  // The control is found by the class the frame's recipe gives it, then by its words in any of a few languages.
-  const words = /pause|stop motion|stop animation|play motion|пауз|останов|движени|анимаци/i;
-  const btn = document.querySelector('.motion-toggle') || [...document.querySelectorAll('button, [role=button]')].find((b) => words.test((b.getAttribute('aria-label') || '') + ' ' + b.textContent));
-  if (!btn) return { found: false, before: endless(), after: endless() };
-  const before = endless();
-  btn.click();
+// Press every region's control (and the global one) and count what still runs.
+const MOTION_TEST = `(async () => {
+  const toggles = [...document.querySelectorAll('[data-motion-toggle]')];
+  const global = document.querySelector('.motion-toggle');
+  toggles.forEach((b) => { if (b.getAttribute('aria-pressed') !== 'true') b.click(); });
+  if (global && global.getAttribute('aria-pressed') !== 'true') global.click();
   await new Promise((r) => setTimeout(r, 500));
-  return { found: true, before, after: endless(), label: (btn.getAttribute('aria-label') || btn.textContent || '').trim().slice(0, 30) };
+  return { after: document.getAnimations().filter((a) => a.playState === 'running').length, toggles: toggles.length, global: !!global };
 })()`;
 
 async function run(kind, { width, height, mobile, media = [], audit = true, shots = true, single = null, walk = false, at = url, scriptOff = false }) {
@@ -311,7 +314,7 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
   if (media.length) await send('Emulation.setEmulatedMedia', { features: media });
   const nav = await send('Page.navigate', { url: at });
   if (nav?.errorText) throw new Error(`could not load ${at}: ${nav.errorText}`);
-  await sleep(4500);
+  await sleep(6000);   // what still moves now has outlived the 5 s that need no control (frame.md §7)
   const shot = async (file) => {
     const s = await send('Page.captureScreenshot', { format: 'jpeg', quality: 78 });
     if (!s || !s.data) throw new Error(`the browser gave no screenshot for ${file} (${s && s.timedOut ? 'timed out: a stylesheet, font or script may be waiting on a network that does not answer' : 'no data'})`);
@@ -341,8 +344,8 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
   if (walk) {
     out.walkCap = Math.min(400, (out.metrics.interactive ?? 20) + 4);
     out.walk = await keyboardWalk(send, out.walkCap);
-    const pz = await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: PAUSE_TEST });
-    out.pause = pz.result?.value ?? { found: false, before: 0, after: 0 };
+    const pz = await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: MOTION_TEST });
+    out.pause = pz.result?.value ?? { after: 0, toggles: 0, global: false };
   }
   out.dialogs = events.filter((e) => e.method === 'Page.javascriptDialogOpening').length;
   out.errors =[...new Set(events.filter((e) => e.method === 'Runtime.exceptionThrown' || (e.method === 'Log.entryAdded' && e.params.entry.level === 'error' && !/favicon/.test(e.params.entry.url ?? '')))
@@ -390,7 +393,7 @@ for (const [name, r] of [['desktop 1440x900', result.desktop], ['phone 390x800',
   L.push(`- navigation: ${m.navVisible.length} of ${m.navAnchors.length} in-page destinations visible in header/nav, menu controls ${m.menuControl}`);
   L.push(`- targets: ${m.interactive} interactive, ${m.targetsUnder24px} under 24px${m.targetsUnder24px ? ' (' + m.targetsUnder24pxSample.join('; ') + ')' : ''}, ${m.targetsUnder44px} under 44px`);
   L.push(`- text: body ${m.bodyFontSize}, ${m.textUnder12px} text elements under 12px${m.textUnder12px ? ' (' + m.textUnder12pxSample.join('; ') + ')' : ''}, ${m.clippedText} clipped${m.clippedText ? ' (' + m.clippedTextSample.join('; ') + ')' : ''}`);
-  L.push(`- motion: ${m.animationsRunning} animations running 4.5s after load, ${m.animationsInfinite} infinite, pause control ${m.pauseControl ? 'found' : 'not found'}; canvas x${m.canvasCount}`);
+  L.push(`- motion: ${m.animationsRunning} animations still running 6s after load, ${m.animationsInfinite} endless, ${m.animationsUncontrolled} outside any motion control (${m.motionToggles} region controls, global control ${m.globalToggle ? 'yes' : 'no'}); canvas x${m.canvasCount}`);
   L.push(`- graphics: svg ${m.svgCount} (${m.svgNotHiddenNorLabelled} neither hidden nor labelled), img without alt ${m.imagesWithoutAlt}, img without reserved size ${m.imagesWithoutSize}`);
   L.push(`- fonts: ${m.fontFacesLoaded} faces loaded (${m.fontFamiliesLoaded.join(', ') || 'none'}); first-choice families ${m.fontsWanted.join(', ')}${m.fontsMissing.length ? '; NOT LOADED: ' + m.fontsMissing.join(', ') : ''}`);
   L.push(`- axe: ${r.axe?.violations?.length ?? 'n/a'} rules violated, ${nodes(r.axe)} nodes`);
@@ -439,9 +442,9 @@ add('FAIL', d.deadAnchors.length === 0, `no dead in-page links (${d.deadAnchors.
 const dropped = d.navVisible.filter((h) => !p.navVisible.includes(h));
 add('FAIL', dropped.length === 0 || p.menuControl > 0, `phone navigation reaches every destination (${dropped.length ? 'not visible on the phone: ' + dropped.join(' ') + (p.menuControl ? ', menu control present' : ', no menu control') : 'all visible'})`);
 add('FAIL', result.reducedMotion.animationsRunning === 0, `nothing animates under reduced motion (${result.reducedMotion.animationsRunning} running)`);
-const pause = result.desktop.pause ?? { found: false, before: 0, after: 0 };
-add('FAIL', d.animationsInfinite === 0 || (pause.found && pause.after === 0), `endless motion has a working pause control (${d.animationsInfinite} endless animations; pause control ${pause.found ? 'found, ' + pause.after + ' still running after pressing it' : 'not found'})`);
-add('WARN', d.canvasCount === 0 || pause.found, `a canvas that animates needs the pause control too (canvas x${d.canvasCount}, pause control ${pause.found ? 'found' : 'not found'})`);
+const pause = result.desktop.pause ?? { after: 0, toggles: 0, global: false };
+add('FAIL', d.animationsRunning === 0 || (d.animationsUncontrolled === 0 && pause.after === 0), `motion that runs on has its own pause (${d.animationsRunning} running at 6s; ${d.animationsUncontrolled} without a control; ${pause.after} still running after pressing)`);
+add('WARN', d.canvasCount === 0 || d.motionToggles > 0 || d.globalToggle, `a canvas that animates needs its own pause control too (canvas x${d.canvasCount}, ${d.motionToggles} region controls, global control ${d.globalToggle ? 'yes' : 'no'})`);
 add('FAIL', d.fontsMissing.length === 0, `first-choice fonts loaded (${d.fontsMissing.length ? 'missing: ' + d.fontsMissing.join(', ') + ' (no loaded @font-face of that name: the host did not answer, or the link is wrong)' : 'all'})`);
 add('FAIL', c.outlineNone === 0 || c.focusVisibleRules > 0, `focus is not removed without a replacement (outline none x${c.outlineNone}, :focus-visible x${c.focusVisibleRules})`);
 add('FAIL', walk.length > 0 && noIndicator.length === 0, `every keyboard stop shows a focus indicator (${walk.length} stops, ${noIndicator.length} without)`);
@@ -480,7 +483,7 @@ const R = d.richness;
 L.push('## RICHNESS (no pass mark: read it against what the style asks for)');
 L.push(`- atmosphere: ${R.gradients} gradients, ${R.shadows} shadows, ${R.blurs} blurs, ${R.blendMaskClip} blend/mask/clip effects, ${R.depth3d} 3D transforms`);
 L.push(`- graphics: ${R.svgGraphics} SVG graphics of 64px or more, ${d.canvasCount} canvas`);
-L.push(`- motion: ${R.keyframes} keyframe animations defined, ${d.animationsRunning} running 4.5s after load, ${d.animationsInfinite} endless`);
+L.push(`- motion: ${R.keyframes} keyframe animations defined, ${d.animationsRunning} still running 6s after load, ${d.animationsInfinite} endless, ${d.animationsUncontrolled} without a control of their own`);
 L.push(`- colour and scale: ${R.colours} distinct colour values, largest type ${R.largestTypePx}px at 1440 wide, ${p.richness.largestTypePx}px on the phone`);
 L.push(`- response: ${c.hoverRules} :hover rules, ${c.activeRules} :active rules, ${c.transitionRules} transitions, for ${d.interactive} interactive elements`);
 L.push('', 'A number is not a look: open the screenshots.', '');

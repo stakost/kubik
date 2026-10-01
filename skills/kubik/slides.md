@@ -49,7 +49,7 @@ build on that and bring this design into it.
   script and build the markup it names in its header: slides as `<section>` children of `main`,
   builds as `.step`, notes as `.notes`, a `.controls` bar with `data-act` buttons and the
   `.motion-toggle`. It does the keys, the wheel, the swipe, the hash, the builds, the overview, the
-  notes, the reading mode, the pause and the theme switch; it is the deck's only runtime
+  notes, the reading mode, the pause (frame.md §7) and the theme switch; it is the deck's only runtime
   (`page-runtime.js` is for pages and is not copied beside it). A hand-written machine has gone
   wrong in most decks that tried; your stylesheet decides everything that shows. Write your own
   only when the deck needs a behaviour the runtime has not got, and then keep every behaviour

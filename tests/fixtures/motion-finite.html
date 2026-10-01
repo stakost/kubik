@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A sound page</title>
+<meta name="description" content="A small page that stands inside the frame.">
+<style>
+  body { margin: 0; font: 18px/1.5 Georgia, serif; color: #14191b; background: #f8f9f6; }
+  .skip { position: absolute; left: 16px; top: -60px; background: #14191b; color: #fff; padding: 12px 16px; }
+  .skip:focus { top: 12px; }
+  header, main, footer { max-width: 40rem; margin: 0 auto; padding: 24px 16px; }
+  nav a { display: inline-block; padding: 12px 8px; min-height: 24px; color: #14191b; }
+  h1 { font-size: 72px; line-height: 1; margin: 0 0 16px; }
+  section { scroll-margin-top: 16px; }
+  button { font: inherit; min-height: 48px; padding: 0 20px; background: #14191b; color: #fff; border: 0; transition: background-color .15s; }
+  button:hover { background: #2340d6; }
+  button:active { background: #000; }
+  a:focus-visible, button:focus-visible { outline: 3px solid #2340d6; outline-offset: 3px; }
+  @keyframes rise { from { opacity: 0 } to { opacity: 1 } }
+  .rise { animation: rise 1s ease both; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header><nav aria-label="Sections"><a href="#one">One</a> <a href="#two">Two</a></nav></header>
+<main id="main">
+  <h1>One idea</h1>
+  <section id="one"><h2>One</h2><p>Text that can be read.</p><button type="button">Press</button></section>
+  <section id="two"><h2>Two</h2><p>More text that can be read.</p></section>
+</main>
+<p class="rise">This arrives once.</p>
+<footer><p>The end of the page.</p></footer>
+</body>
+</html>

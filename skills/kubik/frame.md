@@ -6,7 +6,7 @@ screen needs, whatever the page looks like. It says nothing about how a page sho
 
 **One rule governs all the others: repair the defect, keep the effect.** When something here fails,
 the fix is never to delete what made the page alive. A glow that costs contrast gets a darker
-backing under the text. A loop that never stops gets a pause button. A headline that overflows a
+backing under the text. A loop that has to run on gets its own small pause control (§7). A headline that overflows a
 phone gets a smaller minimum size there, not a smaller size everywhere. A page that passes this file
 by becoming plain has failed the skill that sent you here.
 
@@ -97,7 +97,7 @@ delivery limits (one static file, an email, a sandbox with a content security po
     (services by domain, then by component), the marks are the same elements moved, never a
     second drawing swapped in: a reader follows a thing they were looking at to where it goes.
     Each layout is a view the audit can address (`--views`), both are looked at at both widths,
-    the move itself stops under reduced motion and the pause control, and the state in between
+    the move itself stops under reduced motion and under a pause control where it loops, and the state in between
     is never where a screenshot or a keyboard lands.
   - *A mark that covers what it points at.* An annotation lies above the thing it annotates and
     beside its words, never across them; a drawn circle around a thing has that thing inside it
@@ -181,28 +181,40 @@ under the pointer) is the style's, and it is one of the places a style shows its
 
 ## 7. Motion can be stopped
 
-The pause control and the theme switch are shared machinery: copy `scripts/page-runtime.js` into
-the page's own script and give it the two buttons its header names (`.motion-toggle`, and
-`[data-theme-switch]` where the piece ships two schemes). It pauses every animation and frame
-loop, starts paused under the system's "reduce motion" setting, and keeps the theme the reader
-chose, and it pauses everything while the tab is hidden. The buttons are drawn in the piece's
-world and answer like its other controls; their words are the piece's own language, which is why
-the audit finds the control by its class and never by its words. A pause written by hand instead
-of copied goes wrong in one of three ways (a label the audit cannot read, a frame loop that never
-hears it, a theme forgotten on reload), so it is copied. A deck copies `scripts/deck-runtime.js`
-instead, which carries the same two controls and the stage; never both files.
+**Motion that starts by itself ends by itself within 5 seconds; motion that has to run on carries
+its own small control.** The need is WCAG 2.2.2: a reader can stop what moves beside their text.
+Entrances, reveals, an ambient field, a hero flourish run once or settle, and need no control.
+What the concept needs to keep alive (a live figure, a ticker, a loop, a canvas loop, a video)
+gets a button on or beside the moving thing: a pause / play glyph drawn in inline SVG in the
+piece's style, quiet until hovered or focused and always visible, `aria-label` in the page's
+language, `aria-pressed`, a target of 24px or more (44px on touch). It stops that element's motion
+only; pausing on hover or focus is a welcome extra, never the substitute. What stays is motion the
+reader can stop; what goes is a control nobody asked for in every header. A page where most of it
+moves (an immersive scroll film) may still choose one global `.motion-toggle`; the skill no
+longer asks for it. A deck keeps its pause in its control bar.
 
-Move as much as the style wants. Three conditions:
+Unchanged: `prefers-reduced-motion: reduce` stops everything (loops, parallax, pins, marquees,
+canvas), a hidden tab pauses, and the page is whole without script.
 
-- **The page is whole without script.** An entrance effect's hidden start state is applied by
-  script once it is ready, so a reader without script, or with a library that failed to load, sees
-  everything. The audit renders the page once with script off and compares what is readable.
-- **`prefers-reduced-motion: reduce` stops it**: loops, parallax, pins, marquees, canvas.
-- **Anything that keeps moving has a pause control**, the one `.motion-toggle` button for the whole
-  page, placed and styled as the design likes. A frame loop of your own (canvas, GSAP) checks
-  `window.kubikMotion.on` each frame or listens for the runtime's `kubik:motion` event on
-  `document`, and your stylesheet carries the one rule that stops CSS animation:
-  `.motion-off *, .motion-off *::before, .motion-off *::after { animation-play-state: paused !important; }`.
+The controls and the theme switch are shared machinery: copy `scripts/page-runtime.js` into the
+page's own script and give it the buttons its header names (`[data-motion-toggle]`, with
+`aria-controls` naming the moving element or sitting inside a `[data-motion]` region; and
+`[data-theme-switch]` where the piece ships two schemes). A press pauses every animation in that
+region, sets `motion-off` on it and dispatches `kubik:motion` on it, so a frame loop of your own
+(canvas, GSAP) scoped to the region listens there; the global form checks `window.kubikMotion.on`
+or listens on `document`. Your stylesheet carries the one rule that stops CSS animation:
+`.motion-off, .motion-off *, .motion-off *::before, .motion-off *::after { animation-play-state: paused !important; }`.
+The runtime starts every region paused under reduced motion and keeps the theme the reader chose.
+The buttons answer like the piece's other controls; the audit finds them by attribute and never by
+their words. A pause written by hand instead of copied goes wrong in one of three ways (a label
+the audit cannot read, a frame loop that never hears it, a theme forgotten on reload), so it is
+copied. A deck copies `scripts/deck-runtime.js` instead, which carries the same two controls and
+the stage; never both files.
+
+Move as much as the style wants. One condition more: **the page is whole without script.** An
+entrance effect's hidden start state is applied by script once it is ready, so a reader without
+script, or with a library that failed to load, sees everything. The audit renders the page once
+with script off and compares what is readable.
 
 ## 8. The theme is decided
 
@@ -224,13 +236,13 @@ A page nobody rendered is a draft.
 
 1. **Lint first**: `node <kubik>/scripts/lint.mjs <file>` reads the file in a second, without a
    browser, and names what the audit would fail: structure, sizes written in the stylesheet, a
-   missing pause control, a deck without a wheel. Repair that before spending a browser run.
+   endless motion with no control of its own, a deck without a wheel. Repair that before spending a browser run.
 2. **Run the audit once, when the piece is built**: `node <kubik>/scripts/page-audit.mjs
    <url-or-file> --quick --out <dir>`, with `--out` a directory of its own
    (add `--views "#list,#record,#form"` when the piece has several screens behind one address:
    each is checked and photographed in the same run). It
-   takes screenshots at every width it renders, runs axe-core, walks the page with the Tab key, presses the pause
-   control, and prints two lists; open its screenshots and scroll through all of them as a
+   takes screenshots at every width it renders, runs axe-core, walks the page with the Tab key, presses the motion
+   controls, and prints two lists; open its screenshots and scroll through all of them as a
    stranger would. The quick run covers desktop and phone. The full run (drop `--quick`) adds the
    dark scheme, reduced motion, a tablet and the page with script off; it is the last run when the
    person asks for a full check or the piece is about to go public, and otherwise it waits to be

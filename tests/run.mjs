@@ -134,6 +134,12 @@ console.log('\n## lint');
   const bad = run('node', [join(SCRIPTS, 'lint.mjs'), join(FIX, 'bad.html')]);
   const want = ['no lang', '0 <main>', 'no target', 'under 12px', 'no :focus-visible'];
   check('lint fails the broken page and names the defects', bad.status === 1 && want.every((w) => bad.stdout.includes(w)), bad.stdout);
+  const lint = (f) => run('node', [join(SCRIPTS, 'lint.mjs'), join(FIX, f)]);
+  check('lint: motion that ends by itself needs no control', lint('motion-finite.html').status === 0);
+  const endless = lint('motion-endless.html');
+  check('lint: an endless animation with no control of its own fails and names frame.md section 7', endless.status === 1 && /frame\.md §7/.test(endless.stdout) && /small control/.test(endless.stdout), endless.stdout);
+  check('lint: an endless animation inside a region with [data-motion-toggle] passes', lint('motion-region.html').status === 0, lint('motion-region.html').stdout);
+  check('lint: a global .motion-toggle still passes', lint('motion-global.html').status === 0, lint('motion-global.html').stdout);
   const deck = run('node', [join(SCRIPTS, 'lint.mjs'), join(FIX, 'deck.html')]);
   check('lint passes the test deck (wheel, swipe, control bar all present)', deck.status === 0, deck.stdout);
   check('lint with no file exits 2', run('node', [join(SCRIPTS, 'lint.mjs')]).status === 2);
@@ -190,6 +196,14 @@ else {
   check(`a broken page fails: exit 1 and the ${wanted.length} expected FAIL lines`, bad.status === 1 && got.length === wanted.length, `missing: ${wanted.filter((w) => !got.includes(w)).join('; ')}`);
   const quick = audit('good.html', ['--quick']);
   check('--quick passes the sound page without the dark and reduced-motion runs', quick.status === 0 && !existsSync(join(out, 'good.html', 'desktop-dark.jpg')), quick.stderr);
+  {
+    const line = (r) => (r.stdout.split('\n').find((l) => /motion that runs on has its own pause/.test(l)) ?? r.stdout.slice(0, 300));
+    const fin = audit('motion-finite.html', ['--quick']), end = audit('motion-endless.html', ['--quick']), reg = audit('motion-region.html', ['--quick']), glo = audit('motion-global.html', ['--quick']);
+    check('audit: motion that ends by itself needs no control', /PASS motion that runs on has its own pause \(0 running/.test(fin.stdout), line(fin));
+    check('audit: an endless animation with no control fails', /FAIL motion that runs on has its own pause \([1-9]\d* running at 6s; [1-9]\d* without a control/.test(end.stdout) && end.status === 1, line(end));
+    check('audit: an endless animation in a region with its own control passes, and pressing it stops it', /PASS motion that runs on has its own pause \([1-9]\d* running at 6s; 0 without a control; 0 still running after pressing\)/.test(reg.stdout), line(reg));
+    check('audit: a global .motion-toggle still passes', /PASS motion that runs on has its own pause \([1-9]\d* running at 6s; 0 without a control; 0 still running after pressing\)/.test(glo.stdout), line(glo));
+  }
   const views = audit('views.html', ['--views', '#list,#form']);
   {
     const keep = mkdtempSync(join(tmpdir(), 'kubik-keep-'));

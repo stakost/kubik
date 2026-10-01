@@ -129,8 +129,8 @@ The same message, thrown into six worlds. Each is a different feeling and a diff
 - **The cheap look first** (`scripts/lint.mjs`) reads the file in a second, without a browser, and
   names what the audit would fail. `scripts/deck-runtime.js` is the shared machine of a deck (keys,
   wheel, swipe, hash, builds, overview, notes, reading mode), copied into each deck so that nobody
-  rewrites it wrong; `scripts/page-runtime.js` is the pause control and the theme switch for any
-  piece.
+  rewrites it wrong; `scripts/page-runtime.js` is the per-element motion controls and the theme switch for any
+  piece (the rule is `frame.md` §7).
 - **The look before shipping** (`scripts/page-audit.mjs`) opens the piece in a browser at desktop
   and phone width, in dark mode and with reduced motion, walks it with the keyboard, and ends its
   output with two lists: FRAME (pass, fail, warn) and RICHNESS (how much atmosphere, graphics, motion and

@@ -109,7 +109,7 @@ illustration.
 **Motion tools.** Entry cascades. Scroll reveals. Living details (a pulse, a typewriter, a float,
 a shimmer, a carousel) on the things that are alive. Magnetic buttons and tilt. A marquee. Sticky
 stacks, horizontal pans, pinned splits (`page/scroll.md`). Spring easing
-(`cubic-bezier(0.16, 1, 0.3, 1)` or a real spring), never `linear`.
+(`cubic-bezier(0.16, 1, 0.3, 1)` or a real spring), never `linear`. What starts by itself and runs on past 5 seconds follows `frame.md` §7.
 
 ## 4. Throw the dice
 

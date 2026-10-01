@@ -88,8 +88,9 @@ if (small.length) flag('FAIL', `font-size under 12px declared ${small.length} ti
 if (/\d(vh)\b/.test(css) && !/\d(dvh|svh)\b/.test(css)) flag('WARN', 'vh heights with no dvh/svh: a phone\'s toolbar eats the bottom');
 if (/(?<!calc\([^)]*)100vw/.test(css)) flag('WARN', '100vw: wider than the viewport once a scrollbar shows; use 100% or 100dvw');
 const infinite = /animation[^;]*\binfinite\b|animation-iteration-count\s*:\s*infinite/i.test(css);
-if (infinite && !/motion-toggle/.test(html)) flag('FAIL', 'motion that never ends, and no .motion-toggle button to stop it (frame.md §7)');
-else if (/requestAnimationFrame/.test(js) && !/motion-toggle/.test(html)) flag('WARN', 'requestAnimationFrame in the script and no .motion-toggle: if that loop runs on, it needs the pause control (frame.md §7); a draw-once effect does not');
+const motionControl = /data-motion-toggle|motion-toggle/.test(html);
+if (infinite && !motionControl) flag('FAIL', 'motion that never ends, and no small control of its own to stop it (a [data-motion-toggle] button on or beside the moving thing; frame.md §7)');
+else if (/requestAnimationFrame/.test(js) && !motionControl) flag('WARN', 'requestAnimationFrame in the script and no [data-motion-toggle]: if that loop runs on, it needs its own small pause control (frame.md §7); a draw-once effect does not');
 if (/prefers-color-scheme/.test(css) && !/data-theme-switch/.test(html)) flag('WARN', 'two colour schemes in the stylesheet and no theme switch (data-theme-switch buttons; frame.md §7)');
 if (!/:hover/.test(css)) flag('WARN', 'no :hover rule: controls do not answer the pointer');
 if (!/:active/.test(css) && /<button|<a /.test(html)) flag('WARN', 'no :active rule: controls do not answer the press');
