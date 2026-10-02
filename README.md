@@ -11,25 +11,42 @@ Kubik is Russian for a die.
 
 [**Open the landing page**](https://stakost.github.io/kubik/) and throw the die.
 
-<a href="https://stakost.github.io/kubik/"><img src="https://stakost.github.io/kubik/img/die-throw.gif" alt="The landing page's hero. A die is thrown twice; each time it lands, the headline, colours, type and background of the page change to a different world: a cinematic night, a strict board page, and back." width="960"></a>
+<a href="https://stakost.github.io/kubik/"><img src="https://stakost.github.io/kubik/img/die-throw.gif" alt="The landing page's hero. A die is thrown three times; each landing re-skins the page in place to another direction and another of its five designs: the headline, type, colours, layout and background change, the words stay." width="960"></a>
 
-## New in 1.3: JavaScript only, and variants inside your system
+## New in 1.3: interfaces, whole or one component inside your system
 
-Everything kubik runs is now Node: the dice, the hooks, the lints and the audit. Nothing needs
+Kubik designs interfaces two ways now.
+
+**A whole interface.** Ask for a tracker, a console, a booking flow or a settings page and kubik
+builds the design system and the screens together: roles, states, the kit, and for screens that
+show work over time, the live views from 1.2.
+
+**One component inside a system you already have.** Hand kubik a finished design system in any
+form (a `tokens.css`, a Tailwind config, JSON tokens, a `DESIGN.md`, a screenshot) and name one
+component: a 24-hour timeline, a booking step, an orders table, a deploy view, a ticket queue.
+Kubik first writes the system down as one `system.map.json`, then throws the dice for what the
+system leaves open (composition, how the data is shown, how it is operated) and builds three to
+five implementations, each only from that system's tokens. A value the system lacks is proposed
+by name, with a reason. `scripts/tokens-lint.mjs` checks every variant and prints one line, for
+example `220 values: 216 from the system, 4 proposed, 0 forbidden`; a colour, a length, a duration
+or a query width written by value fails, with the nearest token named.
+
+<a href="https://stakost.github.io/kubik/#system"><img src="https://stakost.github.io/kubik/img/inside-a-system.jpg" alt="The landing's Inside a system section: an engineering die drawn in the system's tokens, and beside it a product screen blurred into context with one sharp, outlined region holding the component kubik built." width="960"></a>
+
+<img src="https://stakost.github.io/kubik/img/components.jpg" alt="Fifteen components in a five by three grid: a coverage timeline, an appointment booking, an orders table, a live deploy view and a ticket queue, each built three ways inside its own invented design system." width="960">
+
+Fifteen components from five kubik runs, three per run, each run given one invented system and one
+component to build. Every variant came out of one throw of the dice and is shown as it came out;
+every tokens-lint line reads 0 forbidden. On the landing page the die throws them into their
+product screens.
+
+Interfaces also keep still: a state change moves nothing, a select opens a list drawn in the
+system with the full keyboard, and a new thing appears where it stands instead of sliding in.
+With `--press`, the audit warns when a press moves the pressed element or its neighbours, replaces
+it by a re-render, or drops keyboard focus.
+
+Everything kubik runs is Node now: the dice, the hooks, the lints and the audit. Nothing needs
 bash, so the plugin works the same on Windows.
-
-Hand kubik a finished design system, in any form (a `tokens.css`, a Tailwind config, JSON tokens,
-a `DESIGN.md`, a screenshot), and name one component: a 24-hour timeline, a side panel, an "N new"
-queue, a filter builder. Kubik first writes the system down as one `system.map.json`, then builds
-three to five different implementations of the component, each only from that system's tokens.
-A value the system lacks is proposed by name, with a reason, and never improvised.
-`scripts/tokens-lint.mjs` checks every variant: a colour, a length or a duration written by value
-fails, with the nearest token named. The dice choose the variants, so the same ask twice gives
-other ones; the check gives the same verdict on the same file.
-
-Interfaces keep still: a state change moves nothing, a select opens a list drawn in the system,
-entrances show in place. With `--press`, the audit now warns when the pressed element or its
-siblings change size or place.
 
 ## New in 1.2: screens that show work as it happens
 
