@@ -70,7 +70,7 @@ const unresolved = [];
 for (const f of mdFiles) {
   for (const [, ref] of read(f).matchAll(/`([\w/.-]+\.(?:md|mjs|sh|js))`/g)) {
     if (ref === 'DESIGN.md') continue;                       // the file a project holds, not one of ours
-    const bare = ['roll.mjs', 'page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs'].includes(ref) ? join('scripts', ref) : ref;
+    const bare = ['roll.mjs', 'page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'tokens-lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs'].includes(ref) ? join('scripts', ref) : ref;
     if (!existsSync(join(SKILL, bare))) unresolved.push(`${relative(ROOT, f)} -> ${ref}`);
   }
 }
@@ -86,7 +86,7 @@ const missing = router.filter((f) => !skillText.includes('`' + f + '`'));
 check('the entry file names every kind, style and shared file', missing.length === 0, missing.join(', '));
 
 console.log('\n## scripts');
-for (const s of ['roll.mjs', 'page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs']) {
+for (const s of ['roll.mjs', 'page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'tokens-lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs']) {
   const r = run('node', ['--check', join(SCRIPTS, s)]);
   check(`${s} parses`, r.status === 0, r.stderr);
 }
@@ -157,6 +157,39 @@ console.log('\n## lint');
   check('lint with no file exits 2', run('node', [join(SCRIPTS, 'lint.mjs')]).status === 2);
   const runtime = read(join(SCRIPTS, 'deck-runtime.js'));
   check('the test deck carries the shared runtime verbatim', read(join(FIX, 'deck.html')).includes(runtime.trim()));
+}
+
+console.log('\n## tokens-lint');
+{
+  const T = join(FIX, 'tokens'), sysMap = join(T, 'system.map.json');
+  const lint = (file, ...maps) => run(process.execPath, [join(SCRIPTS, 'tokens-lint.mjs'), file, ...(maps.length ? maps : [sysMap]).flatMap((x) => ['--map', x])]);
+  const tl = (f, ...maps) => lint(join(T, f), ...maps);
+  const summary = (r) => /^(\d+) values: (\d+) from the system, (\d+) proposed, (\d+) forbidden$/m.exec(r.stdout)?.slice(1).map(Number);
+  const clean = tl('clean.html');
+  check('tokens-lint: a variant built only from the system passes, and allowed literals (0, 100%, 1fr, currentColor, a hairline, a known breakpoint) are not counted', clean.status === 0 && summary(clean)?.join() === '10,10,0,0', clean.stdout);
+  const hex = tl('stray-hex.css');
+  check('tokens-lint: a stray hex fails with its line and the nearest colour token by ΔE', hex.status === 1 && /FAIL line 2: #1b1f2a is a colour written by value; nearest: var\(--color-text-primary\) \(#1b1f24, ΔE \d/.test(hex.stdout) && summary(hex)?.[3] === 1, hex.stdout);
+  const pxr = tl('stray-px.css');
+  check('tokens-lint: a stray px fails with its line and the nearest length token', pxr.status === 1 && /FAIL line 2: 13px is a length written by value; nearest: var\(--text-sm\)/.test(pxr.stdout) && summary(pxr)?.[3] === 1, pxr.stdout);
+  const unknown = tl('unknown-var.css');
+  check('tokens-lint: a var() in neither the map nor a proposal warns and does not fail', unknown.status === 0 && /WARN line 1: var\(--space-9\) is neither in the map nor proposed/.test(unknown.stdout), unknown.stdout);
+  const proposed = tl('motion.html', sysMap, join(T, 'motion.map.json'));
+  check('tokens-lint: a proposed motion token is counted as proposed, and the variant passes', proposed.status === 0 && summary(proposed)?.join() === '3,1,2,0' && !/WARN/.test(proposed.stdout), proposed.stdout);
+  const undeclared = tl('motion.html');
+  check('tokens-lint: the same motion values with no proposal fail', undeclared.status === 1 && /value of its own that no map or proposed block declares/.test(undeclared.stdout), undeclared.stdout);
+  const dir = mkdtempSync(join(tmpdir(), 'kubik-tokens-'));
+  writeFileSync(join(dir, 'tw.css'), '.a{color:var(--color-ink);padding:var(--space-tight);transition:opacity 200ms;border-radius:12px;font-family:"Inter",sans-serif;background:#d9480f}');
+  const tw = lint(join(dir, 'tw.css'), join(T, 'tailwind.map.json'));
+  check('tokens-lint: a map written from a Tailwind-like config names the nearest duration, length, font and colour', tw.status === 1 && /200ms is a duration.*var\(--motion-quick\)/.test(tw.stdout) && /12px is a length.*var\(--space-base\)/.test(tw.stdout) && /Inter is a font.*var\(--font-sans\)/.test(tw.stdout) && /#d9480f is a colour.*var\(--color-signal\) \(#d9480f, ΔE 0\.0\)/.test(tw.stdout) && summary(tw)?.[3] === 4, tw.stdout);
+  writeFileSync(join(dir, 'pic.map.json'), JSON.stringify({ groups: { color: { source: 'screenshot', roles: { ground: { var: '--g', value: '#fff' } } } } }));
+  check('tokens-lint: a map read from a picture is reported as a claim', /map claims, not measured: color \(screenshot\)/.test(lint(join(T, 'stray-px.css'), join(dir, 'pic.map.json')).stdout));
+  writeFileSync(join(dir, 'nosource.map.json'), JSON.stringify({ groups: { color: { roles: {} } } }));
+  const bare = (...a) => run(process.execPath, [join(SCRIPTS, 'tokens-lint.mjs'), ...a]);
+  check('tokens-lint: no arguments, a missing file, a map with no source and a --map with no file all exit 2', [bare(), bare(join(T, 'nope.css'), '--map', sysMap), bare(join(T, 'clean.html'), '--map', join(dir, 'nosource.map.json')), bare(join(T, 'clean.html'), '--map')].every((r) => r.status === 2 && r.stderr.trim() !== ''));
+  rmSync(dir, { recursive: true, force: true });
+  const example = JSON.parse(/```json\n(\{\n  "system"[\s\S]*?\n\})\n```/.exec(read(join(SKILL, 'system', 'map.md')))?.[1] ?? 'null');
+  check('map.md: its full example is valid JSON, every group has a source, and it is a map the lint accepts', example && Object.values(example.groups).every((g) => g.source) && (() => { const f = join(T, 'clean.html'), p = join(tmpdir(), `kubik-example-${process.pid}.json`); writeFileSync(p, JSON.stringify(example)); const r = lint(f, p); rmSync(p); return r.status !== 2; })());
+  check('system.md names system/map.md and the lint, and SKILL.md routes variants to system.md', /system\/map\.md/.test(read(join(SKILL, 'system.md'))) && /tokens-lint\.mjs/.test(read(join(SKILL, 'system.md'))) && /Variants inside a system/.test(skillText));
 }
 
 console.log('\n## hooks');

@@ -68,6 +68,7 @@ record what is asked under "Record".
 | 10 | `kubik: slides about the quarter` (no data given) | `SKILL.md`, `slides.md`, … | one question if you are there; otherwise sample content, marked as sample, and said in the first line of the note |
 | 11 | `what can kubik do?` | `SKILL.md`, `menu.md` | a short menu, no piece built |
 | 12 | `kubik: a live console for agent runs, dark` | `SKILL.md`, `system.md`, `quiet.md`, `method.md`, `frame.md` | three current products named before the throw; a specimen with a time axis and a now-line, a peek panel and a command palette; no bordered KPI row, no uppercase label over every block, no hairline box around every region |
+| 13 | With a `tokens.css` or a Tailwind config in the project: `kubik: four takes on a stream side panel, built from these tokens` | `SKILL.md`, `system.md`, `system/map.md`, `method.md`, `frame.md` | `system.map.json` with a `source` on every group; three to five variants that differ in composition and interaction, each in every state and as a standalone snippet; `tokens-lint` printing `0 forbidden` for each; anything the system lacked listed as proposed |
 
 **Record, for each ask**
 

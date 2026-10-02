@@ -1,0 +1,25 @@
+:root {
+  --color-ground: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-text-primary: #1b1f24;
+  --color-text-muted: #5b6470;
+  --color-line: #d9d6cc;
+  --color-action: #1e4fd8;
+  --color-danger: #b42318;
+  --font-body: "Source Sans 3", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --text-sm: 0.8125rem;
+  --text-md: 0.875rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --shadow-overlay: 0 4px 16px rgb(27 31 36 / 0.16);
+  --row-compact: 28px;
+  --row-regular: 36px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --color-ground: #14171b; --color-surface: #1c2025; --color-text-primary: #e6e9ee; }
+}

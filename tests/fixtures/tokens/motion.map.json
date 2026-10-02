@@ -1,0 +1,4 @@
+{ "extends": "system.map.json",
+  "proposed": [
+    { "var": "--motion-settle", "value": "140ms", "reason": "the system has no motion tokens; an arrival settles in 140ms", "group": "motion" },
+    { "var": "--motion-ease-out", "value": "cubic-bezier(0.2, 0, 0, 1)", "reason": "the system has no easing; one decelerating curve", "group": "motion" } ] }

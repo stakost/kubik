@@ -1,0 +1,6 @@
+{ "theme": { "extend": {
+  "colors": { "ink": { "DEFAULT": "#16213a", "soft": "#4a5878" }, "paper": "#fbfaf7", "signal": "#d9480f" },
+  "spacing": { "tight": "6px", "base": "14px" },
+  "borderRadius": { "card": "10px" },
+  "transitionDuration": { "quick": "150ms" },
+  "fontFamily": { "sans": ["Public Sans", "sans-serif"] } } } }

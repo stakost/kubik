@@ -235,6 +235,54 @@ lead, the devices, the world of this one piece. The register is the system's own
 asks for another, and then only as far as the system's rules allow. The closing note lists each of
 the system's decisions and rules as kept, or broken and why.
 
+## Variants inside a system
+
+The system already exists and is not the work. The person hands over a finished one (tokens, a
+`DESIGN.md`, components, a screenshot) and asks for options of one component or case: a 24-hour
+timeline, a stream's side panel, an "N new" queue, a filter builder. Nothing above is rolled, no
+character is chosen and nothing in the system is redesigned; this section replaces the rest of the
+file for that ask, except that `method.md` and `frame.md` still hold.
+
+The input can be anything, so it is made one thing first: write `system.map.json` in the format of
+`system/map.md`, from whatever arrived, and say which groups are claims. Every variant is then built
+only from that map.
+
+**Fixed:** everything the map holds, the system's states (a component has every one it has in the
+system), its keyboard rules, its density rules and its `rules` list. **Thrown:** the composition,
+how the data is encoded, the interaction model, how detail is disclosed, the motion within the
+map's motion tokens (none, when it has none), and which density is the home.
+
+Throw once per variant, three to five variants, and throw again where two variants share their
+composition and their encoding. These shelves are examples; the component decides which are
+worth having, and the person's words lean them:
+
+```
+node <kubik>/scripts/roll.mjs \
+  composition="a single column|a split|a layered stack|small multiples|a master and a detail|a ribbon|an overlay on the work" \
+  encoding="position on an axis|length|colour intensity|a glyph per item|a table of numbers|a sparkline per row|text only" \
+  interaction="click to open|hover to peek|drag to select|keyboard first, with a cursor|a command line|direct edit in place|a stepper" \
+  disclosure="everything shown|summary first, detail on demand|opens by zoom|grouped and collapsed|a peek panel|a tab per facet" \
+  motion="none|a settle on arrival|a short slide|a cross-fade" \
+  density="compact|regular|both, with a switch"
+```
+
+No throw here is exact, and none is meant to be: the same ask twice gives other variants. What is
+exact is the check, which gives the same verdict on the same file. A value the system lacks is
+proposed, never improvised: the variant declares it in its own `variant-N.map.json` with a name, a
+value and a reason, and uses it by name.
+
+**Hand over:** one specimen page with every variant on it, each shown in every state; each variant
+also as a standalone HTML and CSS snippet that carries its own `:root` of the tokens it uses;
+`system.map.json` and one `variant-N.map.json` per variant; and a note naming, for each variant,
+the throw, what it proposed, and which groups of the map are claims.
+
+**Check:** on every variant, until it prints `0 forbidden`; a WARN about a `var()` the map lacks is
+read and answered, not left. Then the frame's check on the specimen page (`frame.md` §10).
+
+```
+node <kubik>/scripts/tokens-lint.mjs variant-N.html --map system.map.json --map variant-N.map.json
+```
+
 ## A system for a brand's site
 
 Only when asked for. The conventions above do not bind it, the specimen may open like a page, and

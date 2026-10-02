@@ -13,6 +13,20 @@ Kubik is Russian for a die.
 
 <a href="https://stakost.github.io/kubik/"><img src="https://stakost.github.io/kubik/img/die-throw.gif" alt="The landing page's hero. A die is thrown twice; each time it lands, the headline, colours, type and background of the page change to a different world: a cinematic night, a strict board page, and back." width="960"></a>
 
+## New in 1.3: JavaScript only, and variants inside your system
+
+Everything kubik runs is now Node: the dice, the hooks, the lints and the audit. Nothing needs
+bash, so the plugin works the same on Windows.
+
+Hand kubik a finished design system, in any form (a `tokens.css`, a Tailwind config, JSON tokens,
+a `DESIGN.md`, a screenshot), and name one component: a 24-hour timeline, a side panel, an "N new"
+queue, a filter builder. Kubik first writes the system down as one `system.map.json`, then builds
+three to five different implementations of the component, each only from that system's tokens.
+A value the system lacks is proposed by name, with a reason, and never improvised.
+`scripts/tokens-lint.mjs` checks every variant: a colour, a length or a duration written by value
+fails, with the nearest token named. The dice choose the variants, so the same ask twice gives
+other ones; the check gives the same verdict on the same file.
+
 ## New in 1.2: screens that show work as it happens
 
 Ask kubik for a tracker, a console or a settings page and it now builds the screen for the person
@@ -55,7 +69,7 @@ path: `/plugin marketplace add /path/to/kubik` in Claude Code, `codex plugin mar
 `skills/kubik` into it (`~/.claude/skills/kubik`, or `~/.agents/skills/kubik`). The hooks are not
 installed this way.
 
-The dice, the hooks and the lint need Node 16 or newer and no browser.
+The dice, the hooks and the lints need Node 16 or newer and no browser.
 The audit and the deck photographer need Node 22 or newer and a Chromium-family browser: they look
 for Chrome, Chromium, Edge, Brave and the browsers Playwright and Puppeteer keep in their caches,
 on macOS, Linux and Windows, and on PATH; `CHROME_PATH` (or `--chrome <path>`) names one they did
@@ -169,11 +183,12 @@ skills/kubik/
   report.md        a report
   slides.md        a deck
   figures.md       a dashboard, a board pack
-  system.md        a design system for working software: the record, the tokens, the specimen
+  system.md        a design system for working software: the record, the tokens, the specimen; and variants of one component inside a given system
+  system/map.md    the one format any given system is turned into, before variants are made
   reference.md     how to borrow from a reference
   styles/          minimal, brutal, luxe, cinema
   page/            shelf, scroll, redesign, habits, libraries: a page's companion files
-  scripts/         roll.mjs, lint.mjs, page-audit.mjs, deck-shots.mjs, browser.mjs, page-runtime.js, deck-runtime.js, vendor/axe.min.js
+  scripts/         roll.mjs, lint.mjs, tokens-lint.mjs, page-audit.mjs, deck-shots.mjs, browser.mjs, page-runtime.js, deck-runtime.js, vendor/axe.min.js
 skills/kubik-words/
   SKILL.md         the text skill: a router to skills/kubik/words.md
 hooks/
@@ -182,7 +197,7 @@ hooks/
   hooks-codex.json the wiring for Codex
 tests/
   run.mjs          the package's own checks: node tests/run.mjs
-  fixtures/        four small pages the checks run on
+  fixtures/        small pages and token maps the checks run on
 TESTING.md         what to test by hand on each runtime, and how to report it
 AGENTS.md          rules for whoever edits this repository
 ```

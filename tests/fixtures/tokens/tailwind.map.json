@@ -1,0 +1,15 @@
+{
+  "system": "Harbor",
+  "groups": {
+    "color": { "source": "extracted:tailwind.config.json", "roles": {
+      "text-primary": { "var": "--color-ink", "value": "#16213a" },
+      "text-muted": { "var": "--color-ink-soft", "value": "#4a5878" },
+      "ground": { "var": "--color-paper", "value": "#fbfaf7" },
+      "action": { "var": "--color-signal", "value": "#d9480f" } } },
+    "space": { "source": "extracted:tailwind.config.json", "roles": {
+      "tight": { "var": "--space-tight", "value": "6px" }, "base": { "var": "--space-base", "value": "14px" } } },
+    "radius": { "source": "extracted:tailwind.config.json", "roles": { "card": { "var": "--radius-card", "value": "10px" } } },
+    "motion": { "source": "extracted:tailwind.config.json", "roles": { "quick": { "var": "--motion-quick", "value": "150ms" } } },
+    "type": { "source": "extracted:tailwind.config.json", "roles": { "sans": { "var": "--font-sans", "value": "\"Public Sans\", sans-serif" } } }
+  }
+}

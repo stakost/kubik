@@ -1,6 +1,6 @@
 ---
 name: kubik
-description: Use when a landing page, marketing site, portfolio, report, briefing, slide deck, presentation, dashboard, KPI summary, a page of figures and charts, or a design system, UI kit or DESIGN.md is to be designed or redesigned - "make a landing", "a deck", "slides", "a report", "отчёт", "презентация", "дашборд", "графики", "дизайн-система" - when the user gives mood words ("minimal", "premium", "brutalist", "cinematic", "corporate", "playful") or a reference, or when a page or a deck looks templated and should get a look of its own.
+description: Use when a landing page, marketing site, portfolio, report, briefing, slide deck, presentation, dashboard, KPI summary, a page of figures and charts, or a design system, UI kit or DESIGN.md is to be designed or redesigned, or options of one component are wanted inside a design system the person already has - "make a landing", "a deck", "slides", "a report", "отчёт", "презентация", "дашборд", "графики", "дизайн-система", "варианты компонента в нашей системе" - when the user gives mood words ("minimal", "premium", "brutalist", "cinematic", "corporate", "playful") or a reference, or when a page or a deck looks templated and should get a look of its own.
 ---
 
 # Kubik: a free artist, a shared frame, and dice
@@ -25,7 +25,8 @@ throw is the aim, with the experiment inside it, not instead of it.
 
 - **A project that holds a `DESIGN.md`, a tokens file or a brand guide has already spoken.** Read
   it before anything else: its cards are settled, its register is the default, and only what it
-  leaves free is rolled (`system.md`, "Afterwards").
+  leaves free is rolled (`system.md`, "Afterwards"). Options of one component inside it are
+  `system.md`, "Variants inside a system".
 - **A reference** (a link, a screenshot, "like that product") is read with `reference.md`: take
   its decisions, not its pixels.
 
@@ -52,6 +53,7 @@ throw is the aim, with the experiment inside it, not instead of it.
 | slides: a talk, a pitch, a walkthrough, an idea shown on a stage | `slides.md` |
 | figures: a dashboard, a KPI summary, a board pack, a page of charts and tables | `figures.md` |
 | a system: a design system, a UI kit, tokens or a `DESIGN.md`, by default for software people work in (a back office, a console, a management system) | `system.md` |
+| options or variants of one component or case, in a system the person already has (tokens, a `DESIGN.md`, components, a screenshot): "five takes on a timeline with these tokens" | `system.md`, "Variants inside a system" |
 
 A document that already exists and is to be remade keeps its kind unless the person says
 otherwise: a deck stays a deck. When the person does change the kind (a deck into a page or a
@@ -110,7 +112,7 @@ the piece cannot carry; a card pruned after the throw is a throw wasted. Look at
 as `frame.md` §10 says. Your closing note follows `frame.md`, and adds one line for each wish you
 heard: settled, leaned, or set aside and why.
 
-The scripts need what the machine may not have: the dice and the lint need Node 16 or
+The scripts need what the machine may not have: the dice and the lints need Node 16 or
 newer; the audit and the deck photographer need Node 22 or newer and a Chromium-family browser
 (Chrome, Chromium, Edge, Brave, or the one Playwright or Puppeteer keeps in their cache; `--chrome
 <path>` or `CHROME_PATH` names one the script did not find). A script that exits 3 could not run

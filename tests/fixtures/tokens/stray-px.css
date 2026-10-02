@@ -1,0 +1,5 @@
+.panel {
+  padding: 13px var(--space-4);
+  border-radius: var(--radius-2);
+  margin: 0;
+}

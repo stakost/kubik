@@ -62,6 +62,13 @@ Each can be asked for by name. Left unasked, the dice choose.
   tan; cobalt and cream; terracotta and slate; olive, brick and paper; monochrome with one pop;
   ink and acid; dusk; candy on white.
 
+## Variants inside your system
+
+Hand kubik a finished system (a `tokens.css`, a Tailwind config, JSON tokens, a `DESIGN.md`, a
+screenshot) and name one component or case: "five takes on a 24-hour timeline with these tokens".
+It gives three to five different implementations, each built only from the system's tokens, and
+checks each one against them.
+
 ## What else a wish can settle
 
 A colour or a brand; a typeface; a reference ("like this site": kubik takes its decisions, not its

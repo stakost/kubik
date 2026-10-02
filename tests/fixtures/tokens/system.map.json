@@ -1,0 +1,28 @@
+{
+  "system": "Ledger",
+  "groups": {
+    "color": { "source": "file:tokens.css", "roles": {
+      "ground": { "var": "--color-ground", "value": "#f6f5f1", "dark": "#14171b" },
+      "surface": { "var": "--color-surface", "value": "#ffffff", "dark": "#1c2025" },
+      "text-primary": { "var": "--color-text-primary", "value": "#1b1f24", "dark": "#e6e9ee" },
+      "text-muted": { "var": "--color-text-muted", "value": "#5b6470" },
+      "line": { "var": "--color-line", "value": "#d9d6cc" },
+      "action": { "var": "--color-action", "value": "#1e4fd8" },
+      "danger": { "var": "--color-danger", "value": "#b42318" } } },
+    "type": { "source": "file:tokens.css", "roles": {
+      "body": { "var": "--font-body", "value": "\"Source Sans 3\", system-ui, sans-serif" },
+      "mono": { "var": "--font-mono", "value": "\"JetBrains Mono\", monospace" },
+      "size-small": { "var": "--text-sm", "value": "0.8125rem" },
+      "size-body": { "var": "--text-md", "value": "0.875rem" } } },
+    "space": { "source": "file:tokens.css", "roles": {
+      "1": { "var": "--space-1", "value": "4px" }, "2": { "var": "--space-2", "value": "8px" },
+      "3": { "var": "--space-3", "value": "12px" }, "4": { "var": "--space-4", "value": "16px" } } },
+    "radius": { "source": "file:tokens.css", "roles": {
+      "small": { "var": "--radius-1", "value": "2px" }, "medium": { "var": "--radius-2", "value": "4px" } } },
+    "depth": { "source": "file:tokens.css", "roles": {
+      "overlay": { "var": "--shadow-overlay", "value": "0 4px 16px rgb(27 31 36 / 0.16)" } } },
+    "density": { "source": "file:tokens.css", "roles": {
+      "row-compact": { "var": "--row-compact", "value": "28px" }, "row-regular": { "var": "--row-regular", "value": "36px" } } },
+    "breakpoint": { "source": "file:tokens.css", "roles": { "narrow": { "value": "640px" }, "wide": { "value": "1024px" } } }
+  }
+}

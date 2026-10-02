@@ -1,0 +1,5 @@
+.chip {
+  color: #1b1f2a;
+  background: var(--color-surface);
+  border-color: var(--color-line);
+}
