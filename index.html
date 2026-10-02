@@ -640,6 +640,18 @@ code { white-space: nowrap; font-family: var(--mono); font-size: 0.92em; }
 .hero[data-w="siren"] h1, .w-siren .wh { line-height: 1.08; }
 @media (min-width: 901px) and (max-height: 780px) { .w-siren .wbody { padding-top: 104px; padding-bottom: 190px; } .w-siren .tape { bottom: 100px; } .w-siren .wf { gap: 4px; } .w-siren .wf li { padding-block: 2px 4px; } }
 
+/* ---------- GitHub links ---------- */
+.gh-link { flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 14px 0 12px; border-radius: 22px; border: 1.5px solid currentColor; color: inherit; text-decoration: none; font: 600 0.95rem/1 var(--ui); transition: background-color 0.2s, color 0.2s, transform 0.2s var(--ease); }
+.gh-link svg, .menu-gh svg, .src svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+@media (hover: hover) and (pointer: fine) { .gh-link:hover { background: var(--i); color: var(--g); } }
+.gh-link:active { transform: scale(0.96); }
+@media (max-width: 1100px) { .gh-link { padding: 0; } .gh-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } }
+@media (max-width: 820px) { .gh-link { margin-left: auto; } .menu-btn { margin-left: 0; } }
+.menu-gh { gap: 12px; justify-content: flex-start !important; }
+.src { margin-top: 32px; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px 0 16px; border-radius: 24px; border: 2px solid var(--ink); color: var(--ink); font: 700 1rem/1.2 var(--ui); text-decoration: none; transition: background-color 0.2s, color 0.2s; }
+@media (hover: hover) and (pointer: fine) { .src:hover { background: var(--ink); color: var(--paper); } }
+.foot-bar .gh-foot { display: inline-flex; align-items: center; min-height: 44px; }
+
 </style>
 </head>
 <body>
@@ -649,10 +661,11 @@ code { white-space: nowrap; font-family: var(--mono); font-size: 0.92em; }
   <nav aria-label="Sections"><ul>
     <li><a href="#worlds">Worlds</a></li><li><a href="#live">Live screens</a></li><li><a href="#how">How it works</a></li><li><a href="#before-after">Before and after</a></li><li><a href="#pieces">Pieces</a></li><li><a href="#install">Install</a></li>
   </ul></nav>
+  <a class="gh-link" href="https://github.com/stakost/kubik" aria-label="kubik on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg><span>GitHub</span></a>
   <button type="button" class="menu-btn" id="menu-btn" aria-haspopup="dialog" aria-controls="menu"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span></button>
   <dialog class="menu" id="menu" aria-label="Sections">
     <div class="menu-head"><span>Sections</span><button type="button" class="menu-x" id="menu-x"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Close</span></button></div>
-    <ul><li><a href="#worlds">Worlds</a></li><li><a href="#live">Live screens</a></li><li><a href="#how">How it works</a></li><li><a href="#before-after">Before and after</a></li><li><a href="#pieces">Pieces</a></li><li><a href="#install">Install</a></li></ul>
+    <ul><li><a href="#worlds">Worlds</a></li><li><a href="#live">Live screens</a></li><li><a href="#how">How it works</a></li><li><a href="#before-after">Before and after</a></li><li><a href="#pieces">Pieces</a></li><li><a href="#install">Install</a></li><li><a class="menu-gh" href="https://github.com/stakost/kubik"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg><span>kubik on GitHub</span></a></li></ul>
   </dialog>
 </header>
 <main id="main">
@@ -805,11 +818,12 @@ code { white-space: nowrap; font-family: var(--mono); font-size: 0.92em; }
 /plugin install kubik@kubik</pre><button type="button" class="cp" data-copy="cc-code">Copy the commands</button></div>
     <div class="code"><h3>Codex</h3><pre id="cx-code">codex plugin marketplace add stakost/kubik</pre><p>Then open /plugins and install kubik. Codex asks once whether to trust the plugin's hooks.</p><button type="button" class="cp" data-copy="cx-code">Copy the command</button></div>
   </div>
+  <a class="src reveal" href="https://github.com/stakost/kubik"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg><span>Source, issues and releases on GitHub</span></a>
   <p class="need reveal">The dice need only bash. The lint needs Node 16 or newer. The browser audit and the deck photographer need Node 22 or newer and a Chromium-family browser; without one, kubik says what was not checked and carries on.</p>
   <p class="sr" role="status" id="copied"></p>
 </section>
 </main>
-<footer class="foot-bar"><strong>kubik</strong><span>Kubik is Russian for a die. Apache License 2.0.</span><a href="#top">Back to the die</a></footer>
+<footer class="foot-bar"><strong>kubik</strong><span>Kubik is Russian for a die. Apache License 2.0.</span><a class="gh-foot" href="https://github.com/stakost/kubik">GitHub</a><a href="#top">Back to the die</a></footer>
 
 <dialog class="viewer" id="viewer" aria-labelledby="vw-title">
   <div class="vw">
@@ -1230,7 +1244,7 @@ var KubikLive = (function () {
   function tr(m) { return [m[0], m[3], m[6], m[1], m[4], m[7], m[2], m[5], m[8]]; }
   function rot(x, y, z, a) { var l = Math.hypot(x, y, z) || 1; x /= l; y /= l; z /= l; var c = Math.cos(a), s = Math.sin(a), t = 1 - c; return [t * x * x + c, t * x * y - s * z, t * x * z + s * y, t * x * y + s * z, t * y * y + c, t * y * z - s * x, t * x * z - s * y, t * y * z + s * x, t * z * z + c]; }
   function css3(R) { return 'matrix3d(' + [R[0], R[3], R[6], 0, R[1], R[4], R[7], 0, R[2], R[5], R[8], 0, 0, 0, 0, 1].join(',') + ')'; }
-  function topFace(R) { var b = 0, bz = -9; for (var f = 0; f < 6; f++) { var z = mvec(R, FACE[f])[2]; if (z > bz) { bz = z; b = f; } } return b; }
+  function topFace(R, not) { var b = 0, bz = -9; for (var f = 0; f < 6; f++) { if (f === not) continue; var z = mvec(R, FACE[f])[2]; if (z > bz) { bz = z; b = f; } } return b; }
   function squareTo(R, f) {   // the orientation nearest to R that shows face f square to the viewer
     var n = mvec(R, FACE[f]), ax = [n[1], -n[0], 0], s = Math.hypot(ax[0], ax[1]);
     var Q = s < 1e-6 ? (n[2] > 0 ? I3 : rot(0, 1, 0, Math.PI)) : rot(ax[0] / s, ax[1] / s, 0, Math.atan2(s, n[2]));
@@ -1242,6 +1256,7 @@ var KubikLive = (function () {
 
   var R = squareTo(mmul(rot(0.3, 0.8, 0.2, 2.1), I3), 2);   // the first throw is already on the page: face 3, the night
   var wv = [0, 0, 0], mode = 'idle', hopT = 0, settleT = 0, R0 = I3, R1 = I3, DUR = 0.55;
+  var shown = 2, from = -1;   // the face the page wears now; a throw never lands on it again
   var silent = false, leanX = 0, leanY = 0, tx = 0, ty = 0, hopY = 0, last = 0, drag = null, loopId = 0, current = 'night';
   var BASE_X = -17, BASE_Y = -24;
   function render() {
@@ -1261,7 +1276,7 @@ var KubikLive = (function () {
         R = mmul(rot(wv[0] / sp, wv[1] / sp, wv[2] / sp, sp * dt), R);
         var k = Math.exp(-1.75 * dt); wv = [wv[0] * k, wv[1] * k, wv[2] * k];
         hopT += dt; hopY = -78 * Math.exp(-2.2 * hopT) * Math.abs(Math.sin(hopT * 6.2));
-      } else { R0 = R; R1 = squareTo(R, topFace(R)); settleT = 0; mode = 'settle'; }
+      } else { R0 = R; R1 = squareTo(R, topFace(R, from)); from = -1; settleT = 0; mode = 'settle'; }
       busy = true;
     } else if (mode === 'settle') {
       settleT += dt; var s = clamp(settleT / DUR, 0, 1), e = 1 - Math.pow(1 - s, 3);
@@ -1279,11 +1294,12 @@ var KubikLive = (function () {
   function throwDie() {
     if (mode === 'tumble' || mode === 'settle') return;
     if (!motionOn()) {   // lands without tumbling
-      R = squareTo(mmul(rot.apply(null, randUnit().concat([Math.random() * 6])), I3), Math.floor(Math.random() * 6));
+      var f = Math.floor(Math.random() * 5); if (shown >= 0 && f >= shown) f++; if (shown < 0) f = Math.floor(Math.random() * 6);
+      R = squareTo(mmul(rot.apply(null, randUnit().concat([Math.random() * 6])), I3), f);
       hopY = 0; render(); land(topFace(R)); return;
     }
     var u = randUnit(), m = 15 + Math.random() * 10;
-    wv = [u[0] * m, u[1] * m, u[2] * m]; hopT = 0; mode = 'tumble'; throwBtn.setAttribute('aria-busy', 'true'); startLoop();
+    from = shown; wv = [u[0] * m, u[1] * m, u[2] * m]; hopT = 0; mode = 'tumble'; throwBtn.setAttribute('aria-busy', 'true'); startLoop();
   }
   function land(f) {
     throwBtn.removeAttribute('aria-busy');
@@ -1322,7 +1338,7 @@ var KubikLive = (function () {
     var el = Math.max(16, now - t0), vx = sx / el * 1000, vy = sy / el * 1000, sp = Math.hypot(vx, vy);
     if (d.moved < 7 && now - d.t0 < 450) { throwDie(); return; }
     if (!motionOn()) { R = squareTo(R, topFace(R)); render(); land(topFace(R)); return; }
-    if (sp > 260) { var w = clamp(sp * 0.011, 6, 30); wv = [-vy / sp * w, vx / sp * w, (Math.random() - 0.5) * 6]; hopT = 0; mode = 'tumble'; throwBtn.setAttribute('aria-busy', 'true'); startLoop(); }
+    if (sp > 260) { var w = clamp(sp * 0.011, 6, 30); from = shown; wv = [-vy / sp * w, vx / sp * w, (Math.random() - 0.5) * 6]; hopT = 0; mode = 'tumble'; throwBtn.setAttribute('aria-busy', 'true'); startLoop(); }
     else { R0 = R; R1 = squareTo(R, topFace(R)); settleT = 0; mode = 'settle'; startLoop(); }
   }
   hit.addEventListener('pointerup', endDrag); hit.addEventListener('pointercancel', endDrag);
@@ -1338,6 +1354,7 @@ var KubikLive = (function () {
   var skinBusy = null;
   function setWorld(id, how) {
     var w = byId(id); if (!w) return;
+    shown = WORLDS.indexOf(w); if (shown > 5) shown = -1;
     var same = id === current;
     chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c.getAttribute('data-world') === id)); });
     var msg;
