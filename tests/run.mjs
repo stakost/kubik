@@ -275,6 +275,12 @@ else {
       const still = lay('state-still.html', ['--press', '#pick']), moves = lay('state-moves.html', ['--press', '#pick']);
       check('audit: a press that changes colour and moves nothing passes; one that adds a border and shifts its sibling is warned, with the element named', /PASS a press moves nothing/.test(still.stdout) && /WARN a press moves nothing: .*moved: button\.row/.test(moves.stdout), [still, moves].map((r) => r.stdout.split('\n').filter((l) => /moves nothing/.test(l)).join('\n')).join('\n'));
     }
+    {
+      const still = lay('state-still.html', ['--press', '#pick']), lost = lay('state-rerender.html', ['--press', '#pick']), kept = lay('state-rerender-focus.html', ['--press', '#pick']);
+      const rows = (r) => r.stdout.split('\n').filter((l) => /keeps the pressed element|keeps keyboard focus|moves nothing/.test(l)).join('\n');
+      check('audit: a press that re-renders the list names the replaced element and the lost focus, and reports no move', /WARN a press keeps the pressed element: it was replaced by a re-render, and its replacement was not measured/.test(lost.stdout) && /WARN a press keeps keyboard focus: focus lost on press, it fell to body/.test(lost.stdout) && /PASS a press moves nothing/.test(lost.stdout), rows(lost));
+      check('audit: a press that re-renders and puts focus back is warned about the replacement only', /WARN a press keeps the pressed element/.test(kept.stdout) && /PASS a press keeps keyboard focus/.test(kept.stdout) && /PASS a press keeps the pressed element/.test(still.stdout), rows(kept));
+    }
     check('audit: --press with no selector exits 2', run('node', [join(SCRIPTS, 'page-audit.mjs'), join(FIX, 'good.html'), '--press']).status === 2);
   }
   const views = audit('views.html', ['--views', '#list,#form']);

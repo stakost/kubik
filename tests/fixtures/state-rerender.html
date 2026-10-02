@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A re-rendering page</title>
+<meta name="description" content="A page whose press re-renders its list and drops focus.">
+<style>
+  body { margin: 0; font: 18px/1.5 Georgia, serif; color: #14191b; background: #f8f9f6; }
+  header, main, footer { max-width: 40rem; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-size: 72px; line-height: 1; margin: 0 0 16px; text-wrap: balance; }
+  .pick { display: flex; gap: 8px; }
+  .row { font: inherit; min-height: 48px; padding: 0 20px; background: #eef0f4; color: #14191b; border: 2px solid transparent; }
+  .row[aria-pressed="true"] { background: #dfe6ff; box-shadow: inset 0 0 0 2px #2340d6; }
+  .row:focus-visible { outline: 3px solid #2340d6; outline-offset: 3px; }
+</style>
+</head>
+<body>
+<header><p>A small page.</p></header>
+<main id="main">
+  <h1>One idea</h1>
+  <p>Text that can be read.</p>
+  <div class="pick" id="list"><button type="button" class="row" id="pick">First</button><button type="button" class="row">Second</button></div>
+</main>
+<footer><p>The end of the page.</p></footer>
+<script>document.getElementById("list").addEventListener("click", function (e) { if (e.target.id !== "pick") return; var l = e.currentTarget; l.innerHTML = '<button type="button" class="row" id="pick">First, picked</button><button type="button" class="row">Second</button>'; });</script>
+</body>
+</html>

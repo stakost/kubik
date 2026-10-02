@@ -185,7 +185,9 @@ How a piece behaves is part of what the reader needs, and it is designed like ev
   label: neither the element nor its neighbours change size or place. Colour, an inset shadow or an
   outline shows it; a border that adds width, a label that pushes the line, a marker that was not
   reserved do not. What stays is the change itself, stated loudly; `--press` warns when the pressed
-  element or a sibling moved (a disclosure that pushes what follows it is the honest exception).
+  element or a sibling moved (a disclosure that pushes what follows it is the honest exception), that
+  a re-render replaced the pressed element, and that focus fell to `body` (keyboard focus survives a
+  re-render: what stays is the re-rendered control taking focus back).
 - **The state is on screen.** Which slide of how many, which section, which tab is open, what is
   paused, what was copied.
 - **Controls are found without a manual.** The buttons are visible, or a short hint names the keys

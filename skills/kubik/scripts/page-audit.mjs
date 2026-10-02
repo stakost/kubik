@@ -562,12 +562,12 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
     out.pause = pz.result?.value ?? { after: 0, toggles: 0, global: false };
   }
   for (let i = 0; i < press.length; i++) {
-    const ok = await evalIn(`(() => { const el = document.querySelector(${JSON.stringify(press[i])}); if (!el) return false; el.scrollIntoView({ block: 'center' }); window.__kubikBox = () => [el, ...(el.parentElement ? [...el.parentElement.children].filter((c) => c !== el) : [])].map((c) => { const r = c.getBoundingClientRect(); return [c.tagName.toLowerCase() + (c.className && typeof c.className === 'string' ? '.' + c.className.trim().split(/\\s+/)[0] : ''), r.left, r.top, r.width, r.height]; }); window.__kubikBefore = window.__kubikBox(); el.click(); return true; })()`);
+    const ok = await evalIn(`(() => { const el = document.querySelector(${JSON.stringify(press[i])}); if (!el) return false; el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); const els = [el, ...(el.parentElement ? [...el.parentElement.children].filter((c) => c !== el) : [])]; const name = (c) => c.tagName.toLowerCase() + (c.className && typeof c.className === 'string' ? '.' + c.className.trim().split(/\\s+/)[0] : ''); window.__kubikBox = () => els.map((c) => { const r = c.getBoundingClientRect(); return c.isConnected ? [name(c), r.left, r.top, r.width, r.height] : null; }); window.__kubikBefore = window.__kubikBox(); window.__kubikPressed = el; window.__kubikHeld = document.activeElement === el; el.click(); return true; })()`);
     await sleep(1600);   // an overlay's own entrance settles before it is measured
-    const moved = ok ? await evalIn(`window.__kubikBefore.map((b, k) => ({ b, a: window.__kubikBox()[k] })).filter(({ b, a }) => a && b.slice(1).some((v, j) => Math.abs(v - a[j + 1]) > 1)).map(({ b }) => b[0])`) : [];
+    const after = ok ? await evalIn(`(() => { const box = window.__kubikBox(), el = window.__kubikPressed, gone = !el.isConnected; return { gone, lost: gone && window.__kubikHeld && (!document.activeElement || document.activeElement === document.body), moved: window.__kubikBefore.map((b, k) => ({ b, a: box[k] })).filter(({ a }) => a).filter(({ b, a }) => b.slice(1).some((v, j) => Math.abs(v - a[j + 1]) > 1)).map(({ b }) => b[0]) }; })()`) : null;
     const l = await evalIn(LAYOUT({ overlap: true, cover: true }));
     const f = `${kind}-press-${i + 1}.jpg`; await shot(f); out.files.push(f);
-    layout.pressed.push({ selector: press[i], found: !!ok, overlaps: l?.overlaps ?? [], covered: l?.covered ?? [], modal: !!l?.modal, moved: moved ?? [] });
+    layout.pressed.push({ selector: press[i], found: !!ok, overlaps: l?.overlaps ?? [], covered: l?.covered ?? [], modal: !!l?.modal, moved: after?.moved ?? [], gone: !!after?.gone, lost: !!after?.lost });
   }
   out.dialogs = events.filter((e) => e.method === 'Page.javascriptDialogOpening').length;
   out.errors =[...new Set(events.filter((e) => e.method === 'Runtime.exceptionThrown' || (e.method === 'Log.entryAdded' && e.params.entry.level === 'error' && !/favicon/.test(e.params.entry.url ?? '')))
@@ -663,6 +663,9 @@ add('FAIL', sum('overlaps') === 0, `no text printed over other text (${sum('over
 add('FAIL', sum('covered') === 0, `no text lies under, or runs into, something else (${sum('covered')} covered${sum('covered') ? ': ' + first('covered') : ''}; fixed bars are exempt; open an overlay with --press)`);
 const shifted = LAYOUTS.filter(([, l]) => l.moved?.length).map(([w, l]) => `${l.moved.slice(0, 3).join(', ')} (${w})`);
 if (PRESS.length) add('WARN', shifted.length === 0, `a press moves nothing: the pressed element and its siblings keep their size and place${shifted.length ? ' (moved: ' + shifted.slice(0, 3).join('; ') + '; an accordion that pushes its neighbours is the one honest exception)' : ''}`);
+const gone = LAYOUTS.filter(([, l]) => l.gone).map(([w]) => w), lost = LAYOUTS.filter(([, l]) => l.lost).map(([w]) => w);
+if (PRESS.length) add('WARN', gone.length === 0, `a press keeps the pressed element${gone.length ? ': it was replaced by a re-render, and its replacement was not measured (' + gone.slice(0, 3).join('; ') + ')' : ''}`);
+if (PRESS.length) add('WARN', lost.length === 0, `a press keeps keyboard focus${lost.length ? ': focus lost on press, it fell to body (' + lost.slice(0, 3).join('; ') + ')' : ''}`);
 if (PRESS.length) add('WARN', missed.length === 0, `every --press selector matched an element${missed.length ? ' (not found: ' + missed.join('; ') + ')' : ''}`);
 add('FAIL', nodes(result.desktop.axe) === 0, `axe clean at desktop (${nodes(result.desktop.axe)} nodes)`);
 add('FAIL', nodes(result.phone.axe) === 0, `axe clean on the phone (${nodes(result.phone.axe)} nodes)`);
