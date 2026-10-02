@@ -27,6 +27,10 @@ A value the system lacks is proposed by name, with a reason, and never improvise
 fails, with the nearest token named. The dice choose the variants, so the same ask twice gives
 other ones; the check gives the same verdict on the same file.
 
+Interfaces keep still: a state change moves nothing, a select opens a list drawn in the system,
+entrances show in place. With `--press`, the audit now warns when the pressed element or its
+siblings change size or place.
+
 ## New in 1.2: screens that show work as it happens
 
 Ask kubik for a tracker, a console or a settings page and it now builds the screen for the person

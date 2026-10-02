@@ -192,6 +192,14 @@ state, skeleton, progress, stepper; for a live screen, command palette, timeline
 activity feed, peek panel or inspector, filter chips, shortcut hint. Build what the product needs;
 a list, a record and a form cannot be made with fewer than about fifteen of these.
 
+**Fields and lists.** A trailing indicator in a field (a select's chevron, a clear button) sits
+inside the field's padding, never against its edge. A select or a menu opens a list drawn in the
+system's tokens, with the full pattern: arrows, Home and End, type-ahead, Escape, focus back to the
+trigger, `aria-expanded`, and `aria-activedescendant` or roving focus. What stays: the native
+control where it is the better one (a touch device's sheet, a long list on a phone), and wherever a
+drawn list cannot carry that whole keyboard pattern, since a drawn list without it is worse than the
+operating system's.
+
 ## Throw the dice
 
 ```

@@ -266,6 +266,10 @@ else {
       const row = JSON.parse(readFileSync(join(out, 'layout-far-view.html', 'audit.json'), 'utf8')).views?.[0];
       check('audit: a view is measured and photographed with its target in the window, far down the page', far.status === 0 && /target in view yes/.test(far.stdout) && row?.viewAt?.every((x) => x && x.found && x.inView && x.scrollY > 1000), far.stdout.split('\n').filter((l) => /view #/.test(l)).join('\n') + JSON.stringify(row?.viewAt));
     }
+    {
+      const still = lay('state-still.html', ['--press', '#pick']), moves = lay('state-moves.html', ['--press', '#pick']);
+      check('audit: a press that changes colour and moves nothing passes; one that adds a border and shifts its sibling is warned, with the element named', /PASS a press moves nothing/.test(still.stdout) && /WARN a press moves nothing: .*moved: button\.row/.test(moves.stdout), [still, moves].map((r) => r.stdout.split('\n').filter((l) => /moves nothing/.test(l)).join('\n')).join('\n'));
+    }
     check('audit: --press with no selector exits 2', run('node', [join(SCRIPTS, 'page-audit.mjs'), join(FIX, 'good.html'), '--press']).status === 2);
   }
   const views = audit('views.html', ['--views', '#list,#form']);

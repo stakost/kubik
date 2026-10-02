@@ -561,11 +561,12 @@ async function run(kind, { width, height, mobile, media = [], audit = true, shot
     out.pause = pz.result?.value ?? { after: 0, toggles: 0, global: false };
   }
   for (let i = 0; i < press.length; i++) {
-    const ok = await evalIn(`(() => { const el = document.querySelector(${JSON.stringify(press[i])}); if (!el) return false; el.scrollIntoView({ block: 'center' }); el.click(); return true; })()`);
+    const ok = await evalIn(`(() => { const el = document.querySelector(${JSON.stringify(press[i])}); if (!el) return false; el.scrollIntoView({ block: 'center' }); window.__kubikBox = () => [el, ...(el.parentElement ? [...el.parentElement.children].filter((c) => c !== el) : [])].map((c) => { const r = c.getBoundingClientRect(); return [c.tagName.toLowerCase() + (c.className && typeof c.className === 'string' ? '.' + c.className.trim().split(/\\s+/)[0] : ''), r.left, r.top, r.width, r.height]; }); window.__kubikBefore = window.__kubikBox(); el.click(); return true; })()`);
     await sleep(1600);   // an overlay's own entrance settles before it is measured
+    const moved = ok ? await evalIn(`window.__kubikBefore.map((b, k) => ({ b, a: window.__kubikBox()[k] })).filter(({ b, a }) => a && b.slice(1).some((v, j) => Math.abs(v - a[j + 1]) > 1)).map(({ b }) => b[0])`) : [];
     const l = await evalIn(LAYOUT({ overlap: true, cover: true }));
     const f = `${kind}-press-${i + 1}.jpg`; await shot(f); out.files.push(f);
-    layout.pressed.push({ selector: press[i], found: !!ok, overlaps: l?.overlaps ?? [], covered: l?.covered ?? [], modal: !!l?.modal });
+    layout.pressed.push({ selector: press[i], found: !!ok, overlaps: l?.overlaps ?? [], covered: l?.covered ?? [], modal: !!l?.modal, moved: moved ?? [] });
   }
   out.dialogs = events.filter((e) => e.method === 'Page.javascriptDialogOpening').length;
   out.errors =[...new Set(events.filter((e) => e.method === 'Runtime.exceptionThrown' || (e.method === 'Log.entryAdded' && e.params.entry.level === 'error' && !/favicon/.test(e.params.entry.url ?? '')))
@@ -659,6 +660,8 @@ const first = (key) => LAYOUTS.flatMap(([w, l]) => (l[key] ?? []).map((x) => x +
 const missed = LAYOUTS.filter(([, l]) => l.found === false).map(([w]) => w);
 add('FAIL', sum('overlaps') === 0, `no text printed over other text (${sum('overlaps')} pairs${sum('overlaps') ? ': ' + first('overlaps') : ''})`);
 add('FAIL', sum('covered') === 0, `no text lies under, or runs into, something else (${sum('covered')} covered${sum('covered') ? ': ' + first('covered') : ''}; fixed bars are exempt; open an overlay with --press)`);
+const shifted = LAYOUTS.filter(([, l]) => l.moved?.length).map(([w, l]) => `${l.moved.slice(0, 3).join(', ')} (${w})`);
+if (PRESS.length) add('WARN', shifted.length === 0, `a press moves nothing: the pressed element and its siblings keep their size and place${shifted.length ? ' (moved: ' + shifted.slice(0, 3).join('; ') + '; an accordion that pushes its neighbours is the one honest exception)' : ''}`);
 if (PRESS.length) add('WARN', missed.length === 0, `every --press selector matched an element${missed.length ? ' (not found: ' + missed.join('; ') + ')' : ''}`);
 add('FAIL', nodes(result.desktop.axe) === 0, `axe clean at desktop (${nodes(result.desktop.axe)} nodes)`);
 add('FAIL', nodes(result.phone.axe) === 0, `axe clean on the phone (${nodes(result.phone.axe)} nodes)`);

@@ -177,6 +177,11 @@ How a piece behaves is part of what the reader needs, and it is designed like ev
 - **Every control answers.** Anything that can be pressed says so before the press (a hover state
   where there is a pointer, a focus state always) and after it (pressed, busy, done, failed). A
   thing that looks pressable and is not, or is pressable and does not look it, is a defect.
+- **A state change moves nothing.** Selecting a row, opening a panel, hover, focus, error, an "open"
+  label: neither the element nor its neighbours change size or place. Colour, an inset shadow or an
+  outline shows it; a border that adds width, a label that pushes the line, a marker that was not
+  reserved do not. What stays is the change itself, stated loudly; `--press` warns when the pressed
+  element or a sibling moved (a disclosure that pushes what follows it is the honest exception).
 - **The state is on screen.** Which slide of how many, which section, which tab is open, what is
   paused, what was copied.
 - **Controls are found without a manual.** The buttons are visible, or a short hint names the keys
@@ -200,6 +205,9 @@ under the pointer) is the style's, and it is one of the places a style shows its
 **Motion that starts by itself ends by itself within 5 seconds; motion that has to run on carries
 its own small control.** The need is WCAG 2.2.2: a reader can stop what moves beside their text.
 Entrances, reveals, an ambient field, a hero flourish run once or settle, and need no control.
+An entrance shows where the thing is: a crossfade, a blur that resolves or a transform in place, or
+nothing at all. A card or panel that slides or drops in from outside its place is the machine's
+habit, not a motion.
 What the concept needs to keep alive (a live figure, a ticker, a loop, a canvas loop, a video)
 gets a button on or beside the moving thing: a pause / play glyph drawn in inline SVG in the
 piece's style, quiet until hovered or focused and always visible, `aria-label` in the page's
