@@ -55,14 +55,14 @@ path: `/plugin marketplace add /path/to/kubik` in Claude Code, `codex plugin mar
 `skills/kubik` into it (`~/.claude/skills/kubik`, or `~/.agents/skills/kubik`). The hooks are not
 installed this way.
 
-The dice are a bash script and need nothing else. The lint needs Node 16 or newer and no browser.
+The dice, the hooks and the lint need Node 16 or newer and no browser.
 The audit and the deck photographer need Node 22 or newer and a Chromium-family browser: they look
 for Chrome, Chromium, Edge, Brave and the browsers Playwright and Puppeteer keep in their caches,
 on macOS, Linux and Windows, and on PATH; `CHROME_PATH` (or `--chrome <path>`) names one they did
 not find. Without a browser they exit with code 3 and a sentence saying so, and the lint still
-runs; the skill tells the agent to carry on and say in its note what was not checked. The hooks
-need `bash` (Git Bash on Windows). Nothing is installed from npm, and nothing ever installs
-anything to make a check run.
+runs; the skill tells the agent to carry on and say in its note what was not checked. Nothing else
+is needed: no shell, nothing installed from npm, and nothing ever installs anything to make a
+check run.
 
 ## Ask
 
@@ -124,7 +124,7 @@ The same message, thrown into six worlds. Each is a different feeling and a diff
   comfortable, and then the frame.
 - **The shelves** in each kind and style are examples to choose from, not a standard: worlds,
   typefaces, devices, charts, motion.
-- **The dice** (`scripts/roll.sh`) pull a card from each shelf at random, so the work does not
+- **The dice** (`scripts/roll.mjs`) pull a card from each shelf at random, so the work does not
   begin with the most likely answer. A wish settles a card or weights it (`night sky*3`).
 - **The cheap look first** (`scripts/lint.mjs`) reads the file in a second, without a browser, and
   names what the audit would fail. `scripts/deck-runtime.js` is the shared machine of a deck (keys,
@@ -173,11 +173,11 @@ skills/kubik/
   reference.md     how to borrow from a reference
   styles/          minimal, brutal, luxe, cinema
   page/            shelf, scroll, redesign, habits, libraries: a page's companion files
-  scripts/         roll.sh, lint.mjs, page-audit.mjs, deck-shots.mjs, browser.mjs, page-runtime.js, deck-runtime.js, vendor/axe.min.js
+  scripts/         roll.mjs, lint.mjs, page-audit.mjs, deck-shots.mjs, browser.mjs, page-runtime.js, deck-runtime.js, vendor/axe.min.js
 skills/kubik-words/
   SKILL.md         the text skill: a router to skills/kubik/words.md
 hooks/
-  kubik-hook       one script, three modes: session, prompt, subagent
+  kubik-hook.mjs   one script, three modes: session, prompt, subagent
   hooks.json       the wiring for Claude Code
   hooks-codex.json the wiring for Codex
 tests/

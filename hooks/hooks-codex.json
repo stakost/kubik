@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${PLUGIN_ROOT}/hooks/kubik-hook\" session",
+            "command": "node \"${PLUGIN_ROOT}/hooks/kubik-hook.mjs\" session",
             "async": false
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${PLUGIN_ROOT}/hooks/kubik-hook\" prompt",
+            "command": "node \"${PLUGIN_ROOT}/hooks/kubik-hook.mjs\" prompt",
             "async": false
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${PLUGIN_ROOT}/hooks/kubik-hook\" subagent",
+            "command": "node \"${PLUGIN_ROOT}/hooks/kubik-hook.mjs\" subagent",
             "async": false
           }
         ]

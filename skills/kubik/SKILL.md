@@ -12,7 +12,7 @@ a concept and draws it, inside one frame: what the reader on the other side of t
 This file only finds your way. The work is in the files it sends you to. Every path is given from
 this skill's own directory, the one this file was loaded from. In a command that directory is
 written `<kubik>`: you run in the person's project, so give the scripts their full path
-(`bash <kubik>/scripts/roll.sh` becomes `bash /…/skills/kubik/scripts/roll.sh`).
+(`node <kubik>/scripts/roll.mjs` becomes `node /…/skills/kubik/scripts/roll.mjs`).
 
 ## 1. Listen
 
@@ -102,7 +102,7 @@ produce something related). `words.md` §4 runs over every string before the pie
 
 ## 6. Make it, look at it, say what you did
 
-Follow the kind or style file. Roll with `bash <kubik>/scripts/roll.sh` and the command that
+Follow the kind or style file. Roll with `node <kubik>/scripts/roll.mjs` and the command that
 file gives, leaned the way the person pointed. Before the command runs, edit its string: a
 typeface that does not cover the script the piece is written in comes out, and so does any card
 the piece cannot carry; a card pruned after the throw is a throw wasted. Look at the result with
@@ -110,7 +110,7 @@ the piece cannot carry; a card pruned after the throw is a throw wasted. Look at
 as `frame.md` §10 says. Your closing note follows `frame.md`, and adds one line for each wish you
 heard: settled, leaned, or set aside and why.
 
-The scripts need what the machine may not have: the dice need `bash`; the lint needs Node 16 or
+The scripts need what the machine may not have: the dice and the lint need Node 16 or
 newer; the audit and the deck photographer need Node 22 or newer and a Chromium-family browser
 (Chrome, Chromium, Edge, Brave, or the one Playwright or Puppeteer keeps in their cache; `--chrome
 <path>` or `CHROME_PATH` names one the script did not find). A script that exits 3 could not run

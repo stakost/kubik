@@ -179,7 +179,7 @@ instead of replacing them. Nothing loops.
 ## Throw the dice
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   world="annual report|consulting page|control room|business page of a daily|trading terminal|factory board|bank statement|investor letter" \
   figures="IBM Plex Sans|Inter Tight|Public Sans|Golos Text|Manrope|Onest|Source Serif 4" \
   ground="white|warm paper|white with tinted bands of the accent|ink-dark|deep navy" \

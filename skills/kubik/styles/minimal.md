@@ -61,7 +61,7 @@ contents that is the hero. Index cards on a desk. A broadsheet front page.
 ## Throw the dice
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   paper="warm bone + charcoal|cool drafting paper + graphite|newsprint + true black|cream + sepia|ink-dark night edition" \
   serif="Newsreader|Instrument Serif|Playfair Display|Source Serif 4|Cormorant Garamond|EB Garamond|Libre Caslon|DM Serif Display" \
   spot="pale red|pale blue|pale green|pale yellow|lilac|clay|sage" \

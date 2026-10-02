@@ -29,7 +29,7 @@ This style starts from a real throw of the dice, because left alone a model take
 every list. Run it, then direct the result.
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   hero="cinematic centre|artistic asymmetry|editorial split" \
   type="Satoshi|Cabinet Grotesk|Outfit|Geist|Sora|Bricolage Grotesque|Syne" \
   colour="midnight and electric blue|bone and oxblood|forest and brass|cobalt and cream|graphite and acid lime|plum and peach|sand and ultramarine|black, white and one neon|ink and hot coral|deep teal and gold" \

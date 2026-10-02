@@ -70,7 +70,7 @@ two-page manual spread. A shipping label. A dossier cover.
 ## Throw the dice
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   macro="Archivo Black|Archivo widest heaviest|Anton|Bebas Neue|Big Shoulders Display|Unbounded|Inter Tight Black" \
   mono="IBM Plex Mono|JetBrains Mono|Courier Prime|Space Mono|VT323" \
   composition="poster|spec sheet|engineering title block|blueprint|terminal session|manual spread|shipping label|dossier cover" \

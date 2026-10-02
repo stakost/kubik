@@ -195,7 +195,7 @@ a list, a record and a form cannot be made with fewer than about fifteen of thes
 ## Throw the dice
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   character="instrument panel|ledger|clean office|public service|workshop|clinic|control desk|dense dark tool|calm SaaS console|developer console|observability canvas|native-feeling app" \
   home="light|dark|a dark shell around a light surface" \
   neutrals="cool|warm|true grey|tinted toward the accent" \

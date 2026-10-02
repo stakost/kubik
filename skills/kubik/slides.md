@@ -135,7 +135,7 @@ stops under reduced motion, where builds become instant.
 ## Throw the dice
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   world="blueprint|keynote black|Swiss poster|chalkboard|whiteboard sketch|cut paper|magazine spread|museum label|terminal session|comic panels|night sky" \
   display="Archivo wide|Archivo condensed|Bricolage Grotesque|Unbounded|Syne|Anton|Fraunces|Playfair Display|Instrument Serif" \
   accent="orange|vermilion|acid yellow|cobalt|emerald|magenta|chalk white on colour" \

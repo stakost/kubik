@@ -57,8 +57,8 @@ carried out with precision. It is wrong when it happened because plain was safer
    bent the same way: a pale ground becomes a white or paper ground with the tint in blocks and
    bands, so the tint stays light on a surface and does not become the colour of the page.
 
-   If `bash` is not on the machine, draw each card with whatever random source you have (a line
-   of Node, a clock digit) and write `dice thrown by hand` in the note; never choose a card by
+   If Node is not on the machine, draw each card with whatever random source you have (a clock
+   digit) and write `dice thrown by hand` in the note; never choose a card by
    taste and call it a throw.
 
    Read the cards loosely, as a prompt and not an order. You may re-roll one card once (a re-roll

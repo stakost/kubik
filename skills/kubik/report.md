@@ -91,7 +91,7 @@ A two-column broadsheet. Cards of findings that open into detail.
 ## Throw the dice
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   world="field report|broadsheet front page|lab notebook|annual report|dossier|Swiss engineering memo|atlas with plates|zine" \
   reading="IBM Plex Sans|Source Serif 4|Newsreader|Literata|Spectral|Public Sans|Inter Tight|Figtree|Instrument Sans" \
   ground="cool paper|warm paper|white with one colour block|ink-dark with chalk|white with tinted bands of the accent" \

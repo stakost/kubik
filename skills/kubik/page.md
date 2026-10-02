@@ -120,7 +120,7 @@ scroll (sticky stack, horizontal pan, marquee, scrambling text, two halves scrol
 aside or taken in its still form (a route that is drawn, not one that draws itself).
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   colour="cold luxury|forest, bone and amber|black and tan|cobalt and cream|terracotta and slate|olive, brick and paper|monochrome with electric blue|monochrome with signal orange|ink and acid|dusk, indigo into peach|candy on white" \
   type="Geist|Outfit|Sora|Bricolage Grotesque|Syne|Archivo at an extreme width|Unbounded|Instrument Sans|Familjen Grotesk" \
   hero="uneven split|manifesto in type|moving type|canvas or media behind letters|pinned hero|one object in space|full-bleed generative field" \

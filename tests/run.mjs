@@ -70,42 +70,53 @@ const unresolved = [];
 for (const f of mdFiles) {
   for (const [, ref] of read(f).matchAll(/`([\w/.-]+\.(?:md|mjs|sh|js))`/g)) {
     if (ref === 'DESIGN.md') continue;                       // the file a project holds, not one of ours
-    const bare = ['roll.sh', 'page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs'].includes(ref) ? join('scripts', ref) : ref;
+    const bare = ['roll.mjs', 'page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs'].includes(ref) ? join('scripts', ref) : ref;
     if (!existsSync(join(SKILL, bare))) unresolved.push(`${relative(ROOT, f)} -> ${ref}`);
   }
 }
 check('every file a skill text names exists inside the skill', unresolved.length === 0, unresolved.join('\n'));
 const outside = mdFiles.filter((f) => /(^|[\s`(])\.\.\//m.test(read(f))).map((f) => relative(ROOT, f));
 check('no skill text reaches outside its directory (../)', outside.length === 0, outside.join('\n'));
-const rollCommands = mdFiles.filter((f) => read(f).includes('bash <kubik>/scripts/roll.sh')).length;
+const rollCommands = mdFiles.filter((f) => read(f).includes('node <kubik>/scripts/roll.mjs')).length;
 check('no command runs a script by a path relative to the project', mdFiles.every((f) => !/(node|bash) scripts\//.test(read(f))));
+check('no skill text, hook or script calls bash', [...mdFiles, ...walk(join(ROOT, 'hooks')), ...walk(SCRIPTS).filter((p) => !p.includes('vendor'))].every((f) => !/\bbash\b/.test(read(f))));
 check(`every kind and style that throws dice gives a roll command (${rollCommands} files)`, rollCommands >= 8);
 const router = ['page.md', 'report.md', 'slides.md', 'figures.md', 'system.md', 'styles/minimal.md', 'styles/brutal.md', 'styles/luxe.md', 'styles/cinema.md', 'quiet.md', 'menu.md', 'method.md', 'frame.md', 'reference.md'];
 const missing = router.filter((f) => !skillText.includes('`' + f + '`'));
 check('the entry file names every kind, style and shared file', missing.length === 0, missing.join(', '));
 
 console.log('\n## scripts');
-check('roll.sh is valid bash', run('bash', ['-n', join(SCRIPTS, 'roll.sh')]).status === 0);
-for (const s of ['page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs']) {
+for (const s of ['roll.mjs', 'page-audit.mjs', 'deck-shots.mjs', 'lint.mjs', 'deck-runtime.js', 'page-runtime.js', 'browser.mjs']) {
   const r = run('node', ['--check', join(SCRIPTS, s)]);
   check(`${s} parses`, r.status === 0, r.stderr);
 }
-check('roll.sh with no arguments exits 2 with a usage line', (() => { const r = run('bash', [join(SCRIPTS, 'roll.sh')]); return r.status === 2 && /usage/.test(r.stderr); })());
+const roll = (...args) => run(process.execPath, [join(SCRIPTS, 'roll.mjs'), ...args]);
+check('roll.mjs with no arguments exits 2 with a usage line', (() => { const r = roll(); return r.status === 2 && /usage/.test(r.stderr); })());
+check('roll.mjs refuses an argument that is not group=cards (exit 2)', roll('nonsense').status === 2);
 {
-  const r = run('bash', [join(SCRIPTS, 'roll.sh'), 'world=a|b|c', 'device:2=x|y|z', 'lean=only*5']);
+  const r = roll('world=a|b|c', 'device:2=x|y|z', 'lean=only*5');
   const lines = r.stdout.trim().split('\n');
   const pair = (lines[1] ?? '').replace('device: ', '').split(' + ');
-  check('roll.sh draws one card per group, two distinct for :2, and strips weights', r.status === 0 && /^world: [abc]$/.test(lines[0]) && pair.length === 2 && pair[0] !== pair[1] && pair.every((c) => 'xyz'.includes(c)) && lines[2] === 'lean: only', r.stdout);
+  check('roll.mjs draws one card per group, two distinct for :2, and strips weights', r.status === 0 && /^world: [abc]$/.test(lines[0]) && pair.length === 2 && pair[0] !== pair[1] && pair.every((c) => 'xyz'.includes(c)) && lines[2] === 'lean: only', r.stdout);
   let heavy = 0;
-  for (let i = 0; i < 60; i++) if (run('bash', [join(SCRIPTS, 'roll.sh'), 'g=heavy*50|light']).stdout.trim() === 'g: heavy') heavy++;
+  for (let i = 0; i < 60; i++) if (roll('g=heavy*50|light').stdout.trim() === 'g: heavy') heavy++;
   check(`a weighted card is drawn far more often (${heavy} of 60 at weight 50)`, heavy >= 50);
+  let zero = 0;
+  for (let i = 0; i < 20; i++) if (roll('g=gone*0|kept').stdout.trim() === 'g: kept') zero++;
+  check('a card weighted *0 is never drawn', zero === 20, `${zero} of 20`);
+  check('a group whose cards are all *0 is an error (exit 2)', roll('g=a*0|b*0').status === 2);
+  const cyr = roll('цвет=янтарь|прилив', 'эффекты:2=зерно|стекло|блик');
+  const cl = cyr.stdout.trim().split('\n');
+  check('roll.mjs reads Cyrillic names and cards', cyr.status === 0 && /^цвет: (янтарь|прилив)$/.test(cl[0]) && /^эффекты: (зерно|стекло|блик) \+ (зерно|стекло|блик)$/.test(cl[1]) && cl[1].split(' + ')[0].slice(9) !== cl[1].split(' + ')[1], cyr.stdout + cyr.stderr);
+  check('a count above the shelf draws every card once', /^g: ([abc]) \+ (?!\1)([abc]) \+ (?!\1|\2)[abc]$/.test(roll('g:9=a|b|c').stdout.trim()));
+  check('a card may hold spaces, plus signs and a star that is no weight', roll('t=A + B*x').stdout.trim().match(/^t: A \+ B\*x$/) !== null);
 }
-check('roll.sh refuses a group with no cards (exit 2)', run('bash', [join(SCRIPTS, 'roll.sh'), 'empty=']).status === 2);
+check('roll.mjs refuses a group with no cards (exit 2)', roll('empty=').status === 2);
 { // every roll command written in a skill text runs as written, one card per group
   const bad = []; let seen = 0;
-  for (const f of mdFiles) for (const [, body] of read(f).matchAll(/bash <kubik>\/scripts\/roll\.sh \\\n([\s\S]*?)\n```/g)) {
+  for (const f of mdFiles) for (const [, body] of read(f).matchAll(/node <kubik>\/scripts\/roll\.mjs \\\n([\s\S]*?)\n```/g)) {
     const groups = [...body.matchAll(/^\s*([\w:]+)="([^"]*)"/gm)].map((m) => `${m[1]}=${m[2]}`);
-    const r = run('bash', [join(SCRIPTS, 'roll.sh'), ...groups]); seen++;
+    const r = roll(...groups); seen++;
     if (!groups.length || r.status !== 0 || r.stdout.trim().split('\n').length !== groups.length) bad.push(`${relative(ROOT, f)}: ${r.stderr || r.stdout}`);
   }
   check(`every roll command in a skill text runs and draws one line per group (${seen})`, seen >= 8 && bad.length === 0, bad.join('\n'));
@@ -149,14 +160,14 @@ console.log('\n## lint');
 }
 
 console.log('\n## hooks');
-const HOOK = join(ROOT, 'hooks', 'kubik-hook');
+const HOOK = join(ROOT, 'hooks', 'kubik-hook.mjs');
 const state = mkdtempSync(join(tmpdir(), 'kubik-hooks-'));
-const hook = (event, input = '') => run('bash', [HOOK, event], { input, env: { ...process.env, XDG_STATE_HOME: state } });
-check('kubik-hook is valid bash', run('bash', ['-n', HOOK]).status === 0);
+const hook = (event, input = '') => run(process.execPath, [HOOK, event], { input, env: { ...process.env, XDG_STATE_HOME: state } });
+check('kubik-hook.mjs parses', run(process.execPath, ['--check', HOOK]).status === 0);
 for (const f of ['hooks.json', 'hooks-codex.json']) {
   try {
     const h = json(join(ROOT, 'hooks', f)).hooks;
-    check(`${f} wires SessionStart, UserPromptSubmit and SubagentStart to kubik-hook`, ['SessionStart', 'UserPromptSubmit', 'SubagentStart'].every((e) => JSON.stringify(h[e] ?? '').includes('kubik-hook')));
+    check(`${f} wires SessionStart, UserPromptSubmit and SubagentStart to kubik-hook`, ['SessionStart', 'UserPromptSubmit', 'SubagentStart'].every((e) => JSON.stringify(h[e] ?? '').includes('node') && JSON.stringify(h[e] ?? '').includes('kubik-hook.mjs') && !/bash/.test(JSON.stringify(h[e] ?? ''))));
   } catch (e) { check(`${f} is valid JSON`, false, e.message); }
 }
 const ctx = (r) => { try { return JSON.parse(r.stdout).hookSpecificOutput; } catch { return null; } };
@@ -175,7 +186,8 @@ const ctx = (r) => { try { return JSON.parse(r.stdout).hookSpecificOutput; } cat
   const again = [1, 2, 3, 4].map(() => hook('prompt', JSON.stringify({ session_id: 'c3', prompt: 'a new slide deck please' })).stdout.trim() !== '');
   check('prompt hook reminds at most three times a session', again.join() === 'true,true,true,false', again.join());
   check('subagent hook prints its line', ctx(hook('subagent', '{}'))?.hookEventName === 'SubagentStart');
-  check('a hook with no input and an unknown event exits 0 and prints nothing', (() => { const r = hook('nonsense'); return r.status === 0 && r.stdout === ''; })());
+  check('the hook never exits 2: garbage, empty and truncated stdin all exit 0', ['', 'not json', '{\"prompt\": \"нужен лендинг', '\u0000\u0001', '[1,2]', '{\"prompt\": 7}'].every((input) => ['session', 'prompt', 'subagent', ''].every((ev) => { const r = hook(ev, input); return r.status === 0; })));
+check('a hook with no input and an unknown event exits 0 and prints nothing', (() => { const r = hook('nonsense'); return r.status === 0 && r.stdout === ''; })());
 }
 rmSync(state, { recursive: true, force: true });
 

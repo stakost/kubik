@@ -74,7 +74,7 @@ breath reads as luxury and not as a gap where something failed to load.
 ## Throw the dice
 
 ```
-bash <kubik>/scripts/roll.sh \
+node <kubik>/scripts/roll.mjs \
   vibe="night glass|paper and serif|white architecture|liquid chrome and smoke|night aurora|porcelain and ink|brushed titanium with one lamp|deep sea, bioluminescent" \
   light="violet and emerald|amber and rose|ice blue and white|one gold lamp|sunrise gradient|magenta and cyan|moonlight silver" \
   layout="asymmetrical bento|Z-axis cascade|editorial split|single floating hero object|cinematic full-bleed scroll" \
