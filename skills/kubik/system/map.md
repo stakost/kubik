@@ -119,4 +119,9 @@ What stays: the literals no system tokenises. `0`, `100%`, `auto`, `inherit`, `c
 `transparent`, `1fr` and the other grid fractions, unitless numbers (line height, opacity,
 z-index), angles, keywords (`ease-in`, `solid`), `calc()` and `min()` of tokens, a custom property
 that only aliases tokens (`--gap: var(--space-2)`), and a 1px hairline as a border or outline
-width. A breakpoint in `@media` is checked against the `breakpoint` group when the map has one.
+width. A width in an `@media` or `@container` condition cannot be a custom
+property, so it is always a literal, and the lint reads it: a width equal to a `breakpoint` value is
+from the system; a width listed in the variant's `proposed` block is proposed; any other width is
+forbidden, with the nearest breakpoint named. A proposed width is an entry with `group`
+`"breakpoint"`, a `name`, a `value` and a `reason`, and no `var`. A map with no `breakpoint` group
+holds no width, so the variant proposes every one it writes.

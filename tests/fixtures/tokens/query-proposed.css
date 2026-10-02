@@ -1,0 +1,2 @@
+.a { color: var(--color-text-primary); }
+@container card (min-width: 420px) { .a { padding: var(--space-2); } }

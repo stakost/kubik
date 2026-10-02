@@ -62,7 +62,7 @@ const px = (v) => { const m = /^(-?[\d.]+)(px|rem|em)$/.exec(String(v).trim()); 
 const ms = (v) => { const m = /^(-?[\d.]+)(ms|s)$/.exec(String(v).trim()); return m ? parseFloat(m[1]) * (m[2] === 's' ? 1000 : 1) : null; };
 
 // --- the maps: what the system holds, and what a variant proposes
-const sys = new Map(), proposed = new Map(), roles = [], bps = [], claims = [];
+const sys = new Map(), proposed = new Map(), roles = [], bps = [], propBps = [], claims = [];
 for (const f of mapFiles) {
   let j; try { j = JSON.parse(readFileSync(resolve(f), 'utf8')); } catch (e) { die(`${f}: not JSON (${e.message})`); }
   for (const [g, body] of Object.entries(j.groups || {})) {
@@ -76,6 +76,10 @@ for (const f of mapFiles) {
     }
   }
   for (const p of j.proposed || []) {
+    if (p.group === 'breakpoint' && !p.var) {   // a proposed query width has a name, not a property
+      if (!p.name || px(p.value) === null) die(`${f}: a proposed breakpoint needs a name and a width value`);
+      propBps.push(p); continue;
+    }
     if (!/^--[\w-]+$/.test(p.var || '') || p.value === undefined) die(`${f}: a proposed token needs a var (--name) and a value`);
     proposed.set(p.var, p);
   }
@@ -100,7 +104,7 @@ function scan(css, line0) {
     if (c === '"' || c === "'") { q = c; buf += c; continue; }
     if (c === '/' && css[i + 1] === '*') { const e = css.indexOf('*/', i + 2), end = e < 0 ? css.length : e + 2; buf += css.slice(i, end).replace(/[^\n]/g, ' '); i = end - 1; continue; }
     if (c === '(') paren++; else if (c === ')') paren = Math.max(0, paren - 1);
-    if (!paren && c === '{') { const pre = buf.trim(); if (/^@media/i.test(pre)) medias.push({ pre, line: lineAt(start + buf.length - buf.trimStart().length) }); ctx.push(pre); buf = ''; continue; }
+    if (!paren && c === '{') { const pre = buf.trim(); if (/^@(media|container)/i.test(pre)) medias.push({ pre, line: lineAt(start + buf.length - buf.trimStart().length) }); ctx.push(pre); buf = ''; continue; }
     if (!paren && (c === ';' || c === '}')) { flush(); if (c === '}') ctx.pop(); continue; }
     buf += c;
   }
@@ -165,11 +169,21 @@ for (const d of decls) {
     else if (!local.has(r)) { nUnk++; hits.push({ line: d.line, level: 'WARN', text: `var(${r}) is neither in the map nor proposed` }); }
   }
 }
-if (bps.length) for (const m of medias) for (const [, n, u] of m.pre.matchAll(/(\d*\.?\d+)(px|em|rem)\b/g)) {
-  const w = px(n + u);
-  if (bps.some((b) => Math.abs(b - w) <= 1)) nSys++;
-  else { nBad++; const c = roles.filter((r) => r.group === 'breakpoint').sort((a, b) => Math.abs(px(a.value) - w) - Math.abs(px(b.value) - w))[0]; hits.push({ line: m.line, level: 'FAIL', text: `${n}${u} in @media is a breakpoint the map does not hold; nearest: ${c.role} (${c.value})` }); }
+for (const m of medias) for (const [, cond] of m.pre.matchAll(/\(([^()]*)\)/g)) {
+  if (!/width|inline-size/i.test(cond)) continue;
+  for (const [, n, u] of cond.matchAll(/(\d*\.?\d+)(px|em|rem)\b/g)) {
+    const w = px(n + u), at = (b) => Math.abs(px(b.value ?? b) - w) <= 1;
+    const q = m.pre.startsWith('@container') ? '@container' : '@media';
+    if (bps.some((b) => Math.abs(b - w) <= 1)) nSys++;
+    else if (propBps.some(at)) nProp++;
+    else {
+      nBad++;
+      const c = roles.filter((r) => r.group === 'breakpoint').sort((a, b) => Math.abs(px(a.value) - w) - Math.abs(px(b.value) - w))[0];
+      hits.push({ line: m.line, level: 'FAIL', text: `${n}${u} in ${q} is a width ${bps.length ? 'the map does not hold; nearest: ' + c.role + ' (' + c.value + ')' : 'no breakpoint group holds; the map has none: propose it, with a name and a reason'}` });
+    }
+  }
 }
+for (const p of propBps) if (!p.reason) { nBad++; hits.push({ line: 0, level: 'FAIL', text: `proposed breakpoint ${p.name} has no reason` }); }
 for (const [v, p] of proposed) {
   if (!p.reason) { nBad++; hits.push({ line: 0, level: 'FAIL', text: `proposed ${v} has no reason` }); }
   if (!declared.has(v)) hits.push({ line: 0, level: 'WARN', text: `proposed ${v} is never declared in the variant: a standalone snippet will not carry its value` });

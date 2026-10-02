@@ -1,0 +1,2 @@
+.a { color: var(--color-text-primary); }
+@media (max-width: 700px) { .a { padding: var(--space-2); } }

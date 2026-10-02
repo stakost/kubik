@@ -1,0 +1,1 @@
+{ "proposed": [ { "group": "breakpoint", "name": "card-wide", "value": "420px", "reason": "the system has no container widths; a card gains a second column at 420px" } ] }

@@ -343,7 +343,7 @@ async function keyboardWalk(send, limit) {
 // takes nothing from this file. opt: { overlap, cover }.
 function layoutProbe(opt) {
   const d = document, W = innerWidth, H = innerHeight;
-  const modal = [...d.querySelectorAll('dialog[open], [aria-modal="true"]')].find((m) => { const r = m.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(m).visibility !== 'hidden'; });
+  const modal = [...d.querySelectorAll('dialog[open], [aria-modal="true"]')].filter((m) => m.tagName !== 'DIALOG' || m.matches(':modal') || m.getAttribute('aria-modal') === 'true').find((m) => { const r = m.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(m).visibility !== 'hidden'; });
   const scope = modal || d.body;
   const SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE|OPTION|TEXTAREA)$/;
   const clipCache = new Map(), okCache = new Map();
@@ -432,6 +432,7 @@ function layoutProbe(opt) {
     for (const it of items) {
       if (it.r < 0 || it.l > W || it.b < 0 || it.t > H) continue;
       const y = (it.t + it.b) / 2; if (y < 0 || y > H) continue;
+      if (it.el.closest('[inert]')) continue;   // content made inert is meant to be covered
       const w = it.r - it.l, pad = Math.min(3, w / 2);
       for (const x of [it.l + pad, (it.l + it.r) / 2, it.r - pad]) {
         if (x < 0 || x > W) continue;

@@ -260,6 +260,12 @@ system), its keyboard rules, its density rules and its `rules` list. **Thrown:**
 how the data is encoded, the interaction model, how detail is disclosed, the motion within the
 map's motion tokens (none, when it has none), and which density is the home.
 
+**Density against the target floor.** When the map holds a least target size and compact values
+below it, the floor wins for anything a person presses. Compact then moves what is not a target:
+gaps, padding, the row rhythm of non-interactive content, type size. A control may look smaller
+than its hit area when padding or an invisible extension keeps the hit area at the floor. What
+stays is a compact density that reads as compact.
+
 Throw once per variant, three to five variants, and throw again where two variants share their
 composition and their encoding. These shelves are examples; the component decides which are
 worth having, and the person's words lean them:

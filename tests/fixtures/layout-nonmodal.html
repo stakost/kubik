@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A sound page</title>
+<meta name="description" content="A small page that stands inside the frame.">
+<style>
+  body { margin: 0; font: 18px/1.5 Georgia, serif; color: #14191b; background: #f8f9f6; }
+  .skip { position: absolute; left: 16px; top: -60px; background: #14191b; color: #fff; padding: 12px 16px; }
+  .skip:focus { top: 12px; }
+  header, main, footer { max-width: 40rem; margin: 0 auto; padding: 24px 16px; }
+  nav a { display: inline-block; padding: 12px 8px; min-height: 24px; color: #14191b; }
+  h1, h2 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  h1 { font-size: 72px; line-height: 1; margin: 0 0 16px; }
+  section { scroll-margin-top: 16px; }
+  button { font: inherit; min-height: 48px; padding: 0 20px; background: #14191b; color: #fff; border: 0; transition: background-color .15s; }
+  button:hover { background: #2340d6; }
+  button:active { background: #000; }
+  a:focus-visible, button:focus-visible { outline: 3px solid #2340d6; outline-offset: 3px; }
+  .lid { position: relative; margin-top: -34px; height: 40px; background: #c33; }
+  td { padding: 12px 16px; }
+  dialog { width: 320px; padding: 16px; border: 0; }
+  .pop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header><nav aria-label="Sections"><a href="#one">One</a> <a href="#two">Two</a></nav></header>
+<main id="main">
+  <h1>Orders</h1>
+  <section id="one"><h2>Open</h2><table><tr><td>Order 1041</td><td>Paid</td></tr><tr><td>Order 1042</td><td>Waiting</td></tr></table><button type="button" id="open">Details</button></section>
+  <section id="two"><h2>Closed</h2><p>Nothing here yet.</p></section>
+</main>
+<footer><p>The end of the page.</p></footer>
+<dialog id="d" aria-label="Details" style="position:absolute;top:0;left:0;margin:0;width:100%;height:900px;box-sizing:border-box"><p>Order 1041 is paid.</p></dialog>
+<script>document.getElementById('open').addEventListener('click', function () { document.getElementById('d').show(); });</script>
+</body>
+</html>

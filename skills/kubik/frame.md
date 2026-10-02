@@ -129,6 +129,10 @@ delivery limits (one static file, an email, a sandbox with a content security po
 - A frame that holds a picture (a viewer, a lightbox) fits the picture whatever its orientation:
   the picture is scaled to the room that is left after the text and the controls, and the text
   never lies under or over it. `--press` opens one for the audit.
+- Content behind an open modal (a `<dialog>` opened with `showModal()`, a shown element with
+  `aria-modal="true"`, content made `inert`) is meant to be covered, and the covered-text check
+  exempts it; the text inside the modal is still checked. What stays is a failure for text
+  covered by an overlay that is not modal.
 
 - The three usual causes of a page wider than a phone: a headline held together with a
   non-breaking space or `nowrap`; an element positioned off screen with no `overflow: clip` on an
