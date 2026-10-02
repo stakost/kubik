@@ -103,13 +103,17 @@ A small system read from a `tokens.css`, shortened.
 
 ## What a variant may write
 
-Every value in a variant is one of three kinds, and the lint counts each:
+Every value in a variant is one of three kinds, and the lint counts each, with a fourth for what it cannot place:
 
 - **From the system**: `var(--…)` of a property a map names.
 - **Proposed**: `var(--…)` of a property a `proposed` list names.
 - **Forbidden**: a colour, a length, a radius, a shadow, a font, a duration or an easing written
   by value (`#1b1f2a`, `13px`, `140ms`, `cubic-bezier(…)`, `"Inter"`), and a custom property
   with a value of its own that no map or proposed list declares.
+- **Unknown**: a `var(--…)` that no map or proposed list names. A WARN, not a FAIL.
+
+The last line the lint prints counts every value: `N values: X from the system, Y proposed, Z
+forbidden`, and `, W unknown` after it only when W is above 0.
 
 What stays: the literals no system tokenises. `0`, `100%`, `auto`, `inherit`, `currentColor`,
 `transparent`, `1fr` and the other grid fractions, unitless numbers (line height, opacity,

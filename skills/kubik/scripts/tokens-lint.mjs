@@ -6,7 +6,7 @@
 // The map format is `system/map.md`. Every value in the variant is one of: from the system (a
 // var() the map names), proposed (a var() a map's `proposed` block names), or forbidden (a colour,
 // a length, a duration, an easing, a font or a shadow written by value). Forbidden values FAIL
-// with the nearest token; a var() in neither list WARNs. The last line is the summary. Exit code:
+// with the nearest token; a var() in neither list WARNs and is counted as unknown. The last line is the summary. Exit code:
 // 0 when nothing is forbidden, 1 otherwise, 2 on a usage error or a map that breaks the format.
 //
 // Needs only Node 16+. Nothing is installed.
@@ -138,7 +138,7 @@ for (const d of decls) if (d.prop.startsWith('--')) {
   if (!sys.has(d.prop) && !proposed.has(d.prop) && read(d.prop, d.value).lits.length === 0) local.add(d.prop);
 }
 
-const hits = []; let nSys = 0, nProp = 0, nBad = 0;
+const hits = []; let nSys = 0, nProp = 0, nBad = 0, nUnk = 0;
 const near = {
   color: (t) => { const c = toRgb(t); if (!c) return null; let best = null; for (const r of roles.filter((r) => r.group === 'color' && r.var)) for (const v of [r.value, r.dark]) { const x = v && toRgb(v); if (x) { const d = dE(c, x); if (!best || d < best.d) best = { d, r, v }; } } return best && `var(${best.r.var}) (${best.v}, ΔE ${best.d.toFixed(1)})`; },
   length: (t) => { const n = px(t); const c = roles.filter((r) => ['space', 'radius', 'type', 'density'].includes(r.group) && r.var && px(r.value) !== null).sort((a, b) => Math.abs(px(a.value) - n) - Math.abs(px(b.value) - n))[0]; return c && `var(${c.var}) (${c.value})`; },
@@ -162,7 +162,7 @@ for (const d of decls) {
   } else for (const l of lits) { if (l.text === '1px' && HAIRLINE.test(d.prop)) continue; bad(d.line, l.kind, l.text); }
   for (const r of refs) {
     if (sys.has(r)) nSys++; else if (proposed.has(r)) nProp++;
-    else if (!local.has(r)) hits.push({ line: d.line, level: 'WARN', text: `var(${r}) is neither in the map nor proposed` });
+    else if (!local.has(r)) { nUnk++; hits.push({ line: d.line, level: 'WARN', text: `var(${r}) is neither in the map nor proposed` }); }
   }
 }
 if (bps.length) for (const m of medias) for (const [, n, u] of m.pre.matchAll(/(\d*\.?\d+)(px|em|rem)\b/g)) {
@@ -177,5 +177,5 @@ for (const [v, p] of proposed) {
 
 for (const h of hits.sort((a, b) => a.line - b.line)) console.log(`${h.level} ${h.line ? 'line ' + h.line + ': ' : ''}${h.text}`);
 if (claims.length) console.log(`map claims, not measured: ${claims.join(', ')}`);
-console.log(`${nSys + nProp + nBad} values: ${nSys} from the system, ${nProp} proposed, ${nBad} forbidden`);
+console.log(`${nSys + nProp + nBad + nUnk} values: ${nSys} from the system, ${nProp} proposed, ${nBad} forbidden${nUnk ? `, ${nUnk} unknown` : ''}`);
 process.exit(nBad ? 1 : 0);

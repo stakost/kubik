@@ -276,8 +276,9 @@ also as a standalone HTML and CSS snippet that carries its own `:root` of the to
 `system.map.json` and one `variant-N.map.json` per variant; and a note naming, for each variant,
 the throw, what it proposed, and which groups of the map are claims.
 
-**Check:** on every variant, until it prints `0 forbidden`; a WARN about a `var()` the map lacks is
-read and answered, not left. Then the frame's check on the specimen page (`frame.md` §10).
+**Check:** on every variant, until the summary line (`N values: X from the system, Y proposed, Z
+forbidden`, with `, W unknown` when there are any) shows `0 forbidden` and no unknown; a WARN about a
+`var()` the map lacks is read and answered, not left. Then the frame's check on the specimen page (`frame.md` §10).
 
 ```
 node <kubik>/scripts/tokens-lint.mjs variant-N.html --map system.map.json --map variant-N.map.json

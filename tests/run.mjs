@@ -172,7 +172,7 @@ console.log('\n## tokens-lint');
   const pxr = tl('stray-px.css');
   check('tokens-lint: a stray px fails with its line and the nearest length token', pxr.status === 1 && /FAIL line 2: 13px is a length written by value; nearest: var\(--text-sm\)/.test(pxr.stdout) && summary(pxr)?.[3] === 1, pxr.stdout);
   const unknown = tl('unknown-var.css');
-  check('tokens-lint: a var() in neither the map nor a proposal warns and does not fail', unknown.status === 0 && /WARN line 1: var\(--space-9\) is neither in the map nor proposed/.test(unknown.stdout), unknown.stdout);
+  check('tokens-lint: a var() in neither the map nor a proposal warns, is counted as unknown, and does not fail', unknown.status === 0 && /WARN line 1: var\(--space-9\) is neither in the map nor proposed/.test(unknown.stdout) && /^2 values: 1 from the system, 0 proposed, 0 forbidden, 1 unknown$/m.test(unknown.stdout), unknown.stdout);
   const proposed = tl('motion.html', sysMap, join(T, 'motion.map.json'));
   check('tokens-lint: a proposed motion token is counted as proposed, and the variant passes', proposed.status === 0 && summary(proposed)?.join() === '3,1,2,0' && !/WARN/.test(proposed.stdout), proposed.stdout);
   const undeclared = tl('motion.html');
