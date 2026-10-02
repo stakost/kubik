@@ -22,9 +22,9 @@ chip while you read, a panel that opens an item beside the list, and ⌘K for ev
 current characters join the seven older ones in the roll, and the skill names the look it steers
 away from: an opening row of boxed KPI tiles with an uppercase label over each.
 
-<img src="https://stakost.github.io/kubik/img/console-pair.jpg" alt="The same brief, an agent console, built twice. Left, a model on its own: five boxed KPI tiles, a bar chart and a table. Right, kubik 1.2: every agent's runs on one time axis with a line for now, scheduled work drawn dashed, a quiet gap labelled, and the table below." width="960">
+<img src="https://stakost.github.io/kubik/img/console-pair.jpg" alt="The same brief, an agent console, built twice. Left, kubik 1.0: it opens on bordered boxes of figures, a bar chart and a table of runs. Right, kubik 1.2: every agent's runs on one time axis with a line for now, scheduled work drawn dashed, a quiet gap labelled, and the table below." width="960">
 
-The same brief built twice: by a model on its own (left) and with kubik 1.2 (right). In a blind
+The same brief built twice: with kubik 1.0 (left) and with kubik 1.2 (right). In a blind
 test, five interfaces were each built three ways and scored out of 25 by a critic who did not know
 which was which. Kubik 1.2 came first on all five (114 in total), kubik 1.0 second (106), no kubik
 third (87). It was one build per cell, so the order holds and the size of the gap is a first
